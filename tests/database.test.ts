@@ -368,10 +368,10 @@ describe("PostgreSQL: migrations, permissions and transactional mutations", () =
     });
   });
   it("calculates warning expiry on the server without deleting history", async () => {
-    const member = (
-      await rows("select id from public.team_members limit 1")
-    )[0];
     await asUser(db, ADMIN, async () => {
+      const member = await mutate("team_members", randomUUID(), 0, {
+        name: "Warnablaufprüfung",
+      });
       const old = await mutate("warnings", randomUUID(), 0, {
         member_id: member.id,
         level: 1,

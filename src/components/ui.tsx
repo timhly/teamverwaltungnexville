@@ -16,7 +16,7 @@ import {
   type ButtonHTMLAttributes,
   type ReactNode,
 } from "react";
-import { cn, initials } from "../lib/utils";
+import { cn } from "../lib/utils";
 import { useStore } from "../lib/store";
 import { draftPrefix, readDraft, removeDraft, writeDraft } from "../lib/drafts";
 
@@ -58,18 +58,19 @@ export function Avatar({
   name: string;
   size?: "normal" | "large";
 }) {
-  const colors = ["#7bd5b2", "#70bbd0", "#b3d76e", "#a6a7d1", "#d3ae7d"];
   return (
     <span
       aria-hidden="true"
       className={cn("avatar", size === "large" && "avatar-lg")}
-      style={
-        {
-          "--avatar-color": colors[name.charCodeAt(0) % colors.length],
-        } as React.CSSProperties
-      }
+      title={name}
     >
-      {initials(name)}
+      <img
+        src={`${import.meta.env.BASE_URL}brand/nexville-avatar.gif`}
+        alt=""
+        width={size === "large" ? 56 : 36}
+        height={size === "large" ? 56 : 36}
+        loading="lazy"
+      />
     </span>
   );
 }

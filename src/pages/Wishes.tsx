@@ -68,7 +68,7 @@ export default function Wishes() {
               {data.team_wishes.filter((w) => w.status !== "archived").length}
             </span>
           </h1>
-          <p>Ein Platz für neue Ideen und ein noch besseres Nexville.</p>
+          <p>Ideen sammeln, priorisieren und den Fortschritt verfolgen.</p>
         </div>
         {editable && (
           <Button onClick={() => setIsNew(true)}>

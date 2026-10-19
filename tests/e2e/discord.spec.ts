@@ -143,6 +143,23 @@ test("an account with an allowlisted verified Discord identity receives admin ac
   await expect(page.locator(".discord-account")).toContainText(
     "470653391094415362",
   );
+  await expect(page.locator(".discord-account")).toContainText("Smok");
+  await expect(page.locator(".avatar img").first()).toHaveAttribute(
+    "src",
+    "/brand/nexville-avatar.gif",
+  );
+  await expect
+    .poll(async () =>
+      page
+        .locator(".avatar img")
+        .first()
+        .evaluate(
+          (img) =>
+            (img as HTMLImageElement).complete &&
+            (img as HTMLImageElement).naturalWidth === 320,
+        ),
+    )
+    .toBe(true);
   await page.reload();
   await expect(page.locator(".access-requests-panel")).toBeVisible();
 });

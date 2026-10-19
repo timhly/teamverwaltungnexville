@@ -22,6 +22,8 @@ Ansichten aus der lokalen Prüfung: [Desktop](docs/preview/desktop.png), [Smartp
 - Getrennte Anwesenheit je Sitzung: Offen, Anwesend, Angemeldet, Abgemeldet. Namen und Rollen werden als historische Momentaufnahme gespeichert.
 - Besprechungen kopieren, nach Datum/Status suchen und über den Druckdialog als PDF speichern.
 - Verwarnungen mit drei Stufen, Grund, Beginn, optionalem Ablauf, Informationen, Aufhebung und Historie. Keine aktive Verwarnung wird grün angezeigt.
+- Dunkle, per Tastatur bedienbare Verwarnungsmenüs. Ausschließlich die Teamränge Projektleitung und Management sind geschützt; auch Administratoren können ihnen keine Verwarnung geben. Eine Beförderung in diese Ränge hebt bestehende Verwarnungen mit Historie auf.
+- Feste Kontonamen für die fünf bestätigten Discord-IDs: Smok, HAZE, Soon, Apx und Ivy. Die Namen erscheinen in Einstellungen und Audit-Autorenangaben. Alle Profilbilder verwenden das unveränderte animierte Nexville-GIF.
 - Teamwünsche mit Beschreibung, Einreicher, Priorität, Status, Notizen, Archivierung und berechtigter Löschung.
 - Automatisches Speichern, dauerhafte lokale Warteschlange, sofort gesicherte Textentwürfe, Wiederholung vorübergehender Fehler, Versionsprüfung und verständliche Konfliktauflösung.
 - Anmeldung ausschließlich mit Discord, Administrator/Bearbeiter/Leser und gezielte Bearbeiterrechte pro Modul. E-Mail-/Passwortformulare und E-Mail-Einladungen werden in der Oberfläche nicht angeboten.
@@ -55,6 +57,8 @@ Bis die nächsten Schritte erledigt sind, siehst du die Einrichtungsansicht. Es 
    4. `supabase/migrations/202610190004_rank_order.sql`
    5. `supabase/migrations/202610190005_discord_access.sql`
    6. `supabase/migrations/202610190006_discord_admins.sql`
+   7. `supabase/migrations/202610190007_warning_protection.sql`
+   8. `supabase/migrations/202610190008_display_names.sql`
 
 4. Unter **Authentication → Sign In / Providers** den Discord-Anbieter aktivieren und den E-Mail-Anbieter deaktivieren. **Allow new users to sign up** muss für die erste Discord-Anmeldung eingeschaltet sein; die lokale Konfiguration erlaubt dies bereits. Das erstellt nur ein Auth-Konto. Teamzugriff wird separat über die Datenbank geprüft. Discord Client ID und Client Secret nach [dieser Anleitung](docs/DISCORD.md) ausschließlich bei Supabase hinterlegen.
 5. Unter **Authentication → URL Configuration** als Site URL zunächst deine Entwicklungsadresse setzen. Die Entwicklungsadresse und später die vollständige Render-Adresse als erlaubte Redirect URLs hinzufügen, jeweils mit abschließendem `/`. Bei GitHub Pages gehört auch der Repository-Pfad dazu.

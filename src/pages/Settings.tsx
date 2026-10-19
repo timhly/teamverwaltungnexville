@@ -20,9 +20,7 @@ export default function Settings() {
         <div>
           <span className="eyebrow">DEIN TEAMRAUM. DEINE EINSTELLUNGEN.</span>
           <h1>Einstellungen</h1>
-          <p>
-            Zugänge, Berechtigungen und die Grundlagen deiner Zusammenarbeit.
-          </p>
+          <p>Discord-Konten, Zugriffsrechte und Servereinstellungen.</p>
         </div>
       </div>
       {error && (
@@ -150,7 +148,7 @@ export default function Settings() {
                           <strong>{u?.display_name || "Benutzer"}</strong>
                           {u?.discord_id && (
                             <small className="account-id">
-                              Discord: {u.discord_name} · {u.discord_id}
+                              Discord-ID: {u.discord_id}
                             </small>
                           )}
                         </div>

@@ -186,10 +186,10 @@ test("warning dates and wish status are saved in the backend", async ({
   await page
     .getByRole("button", { name: "Verwarnung eintragen", exact: true })
     .click();
-  await page
-    .getByLabel("Mitglied", { exact: true })
-    .selectOption({ label: "HAZE" });
-  await page.getByLabel("Verwarnungsstufe", { exact: true }).selectOption("2");
+  await page.getByLabel("Mitglied", { exact: true }).click();
+  await page.getByRole("option", { name: "HAZE", exact: true }).click();
+  await page.getByLabel("Verwarnungsstufe", { exact: true }).click();
+  await page.getByRole("option", { name: "Warn 2", exact: true }).click();
   await page
     .getByLabel("Grund", { exact: true })
     .fill("Dokumentierter Testgrund");
@@ -233,6 +233,52 @@ test("warning dates and wish status are saved in the backend", async ({
     page.getByText("Gemeinsamer Teamabend", { exact: true }),
   ).toBeVisible();
   await expect(page.locator(".wish-card")).toContainText("In Bearbeitung");
+});
+
+test("warning menu is readable, keyboard accessible and excludes protected leadership", async ({
+  page,
+}) => {
+  await login(page);
+  await page.goto("/#/verwarnungen");
+  await expect(page.getByRole("row").filter({ hasText: "ApX" })).toContainText(
+    "Geschützt",
+  );
+  await expect(page.getByRole("row").filter({ hasText: "Soon" })).toContainText(
+    "Geschützt",
+  );
+  await expect(
+    page.getByLabel("Verwarnungsstufe ApX", { exact: true }),
+  ).toHaveCount(0);
+  const trigger = page.getByLabel("Verwarnungsstufe HAZE", { exact: true });
+  await trigger.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("listbox")).toBeVisible();
+  await expect(
+    page.getByRole("option", { name: "Warn 3", exact: true }),
+  ).toBeVisible();
+  await page.screenshot({
+    path: "test-results/warning-menu.png",
+    fullPage: false,
+  });
+  await page.keyboard.press("Escape");
+  await expect(trigger).toBeFocused();
+  await page
+    .getByRole("button", { name: "Verwarnung eintragen", exact: true })
+    .click();
+  await page.getByLabel("Mitglied", { exact: true }).click();
+  await expect(
+    page.getByRole("option", { name: "ApX", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("option", { name: "Soon", exact: true }),
+  ).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await closeDialog(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByLabel("Verwarnungsstufe HAZE", { exact: true }).click();
+  const menu = await page.getByRole("listbox").boundingBox();
+  expect(menu!.x).toBeGreaterThanOrEqual(0);
+  expect(menu!.x + menu!.width).toBeLessThanOrEqual(390);
 });
 
 test("reader cannot edit and the database refuses manipulated writes", async ({

@@ -50,6 +50,7 @@ export interface Role extends Entity {
   reference_count: number | null;
   kind: "rank" | "extra" | "legacy";
   sort_order: number;
+  warning_exempt?: boolean;
 }
 export interface MemberRole {
   id: string;

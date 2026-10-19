@@ -79,32 +79,6 @@ export default function Dashboard() {
           }).format(new Date())}
         </div>
       </div>
-      <section className="welcome-banner" aria-label="Nexville Roleplay">
-        <div className="banner-copy">
-          <Badge tone="lime">
-            <span className="live-dot" /> NEXVILLE ROLEPLAY
-          </Badge>
-          <h2>
-            Gute Zusammenarbeit.
-            <br />
-            Eine lebendige Community.
-          </h2>
-          <p>
-            Behalte den Überblick und gestalte
-            <br className="desktop-break" /> gemeinsam mit deinem Team Nexville.
-          </p>
-          <Button variant="secondary" onClick={() => navigate("/mitglieder")}>
-            Zum Team <ArrowUpRight size={16} />
-          </Button>
-        </div>
-        <div className="banner-art">
-          <img
-            src={`${import.meta.env.BASE_URL}brand/nexville-banner.gif`}
-            alt="Animiertes Nexville Roleplay Logo"
-          />
-        </div>
-        <div className="banner-shape" />
-      </section>
       <section className="stats-grid" aria-label="Teamstatistik">
         {[
           {
@@ -156,6 +130,29 @@ export default function Dashboard() {
             </div>
           </Link>
         ))}
+      </section>
+      <section className="welcome-banner" aria-label="Nexville Roleplay">
+        <div className="banner-copy">
+          <Badge tone="lime">
+            <span className="live-dot" /> NEXVILLE ROLEPLAY
+          </Badge>
+          <h2>
+            Nexville Roleplay.
+            <br />
+            Dein Teamraum.
+          </h2>
+
+          <Button variant="secondary" onClick={() => navigate("/mitglieder")}>
+            Zum Team <ArrowUpRight size={16} />
+          </Button>
+        </div>
+        <div className="banner-art">
+          <img
+            src={`${import.meta.env.BASE_URL}brand/nexville-banner.gif`}
+            alt="Animiertes Nexville Roleplay Logo"
+          />
+        </div>
+        <div className="banner-shape" />
       </section>
       <div className="dashboard-columns">
         <section className="panel team-panel">

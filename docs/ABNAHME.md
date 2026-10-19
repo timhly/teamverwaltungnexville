@@ -1,6 +1,6 @@
 # Abnahmeprotokoll · Nexville Roleplay
 
-Stand: 19.10.2026. Im verbundenen Supabase-Projekt wurden alle sechs Migrationen nachgewiesen, der Nexville-Teamraum mit neun Ausgangsmitgliedern angelegt und Administratorrechte für Discord-ID `470653391094415362` per Datenbankabfrage bestätigt. Die vollständige produktive Konfiguration wurde nicht geprüft. Die lokalen Ergebnisse beziehen sich auf den ausgelieferten Code und die PostgreSQL-Testumgebung.
+Stand: 19.10.2026. Im verbundenen Supabase-Projekt wurden alle acht Migrationen angewendet, der Nexville-Teamraum mit neun Ausgangsmitgliedern angelegt und Administratorrechte sowie Anzeigename „Smok“ für Discord-ID `470653391094415362` per Datenbankabfrage bestätigt. ApX und Soon haben ihre geschützten Ränge und keine unaufgehobenen Verwarnungen. Die vollständige produktive Konfiguration wurde nicht geprüft. Die lokalen Ergebnisse beziehen sich auf den ausgelieferten Code und die PostgreSQL-Testumgebung.
 
 ## Lokal überprüft
 
@@ -42,8 +42,14 @@ Stand: 19.10.2026. Im verbundenen Supabase-Projekt wurden alle sechs Migrationen
 | Alle fünf freigegebenen Discord-IDs direkt als Administrator, wiederholbar ohne doppelte Änderung | Datenbanktests erfolgreich |
 | Automatische Administratorfreigabe im Browser, nach Neuladen erhalten | Mit verknüpfter Discord-Testidentität geprüft |
 | Keine Freigabe durch fremde Provider, eigene Rechtevergabe oder bearbeitbare Metadaten | Datenbanktests erfolgreich |
+| Verwarnungen für Projektleitung und Management, auch durch Administratoren und mit manipulierten Requests, ablehnen | Datenbanktests erfolgreich |
+| Bei Beförderung bestehende/future Verwarnungen aufheben und Wiederaktivierung verhindern | Datenbanktests erfolgreich |
+| Administration und sonstige Ränge bleiben verwarnbar, Website-Adminrecht ist keine Ausnahme | Datenbanktests erfolgreich |
+| Verwarnungsmenü mit Tastatur, geschützten Mitgliedern und 390-px-Mobilansicht | Im lokalen Browser geprüft |
+| Alle fünf festen Discord-Anzeigenamen und Autorenangaben neuer/geänderter Logs | Datenbanktests erfolgreich |
+| Gemeinsames Profil-GIF mit 320 × 320 Pixeln und 171 Frames | Originaldatei und Browserabruf geprüft |
 
-Reproduzieren mit `npm test`, `npm run test:e2e` und `npm run build`. Die Suite umfasst 51 Unit-/Datenbanktests und 13 Browsertests, einschließlich sofortigem Neuladen vor Ablauf der Speicherpause und einem konkurrierenden Serverwrite. Der Browserbericht dokumentiert die Szenarien und ihre Screenshots. Auth-Antworten und Discord-Weiterleitungen sind lokale Test-Fixtures; diese Tests ersetzen keine Prüfung an Discord und dem echten Supabase-Projekt.
+Reproduzieren mit `npm test`, `npm run test:e2e` und `npm run build`. Die Suite umfasst 65 Unit-/Datenbanktests und 14 Browsertests, einschließlich sofortigem Neuladen vor Ablauf der Speicherpause und einem konkurrierenden Serverwrite. Der Browserbericht dokumentiert die Szenarien und ihre Screenshots. Auth-Antworten und Discord-Weiterleitungen sind lokale Test-Fixtures; diese Tests ersetzen keine Prüfung an Discord und dem echten Supabase-Projekt.
 
 ## Noch nicht verifiziert
 

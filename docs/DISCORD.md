@@ -119,3 +119,7 @@ Für die übliche Installation mit einem Team ist keine zusätzliche Variable n�
 Mit einer freigegebenen Discord-ID anmelden und die Verwaltungsrechte prüfen. Danach ein anderes Discord-Konto anmelden, Zugang als Leser anfragen und freigeben. Zuletzt ein vorhandenes E-Mail-Konto über „Discord verbinden“ testen. Die automatisierten Tests verwenden eine simulierte Auth-Weiterleitung und tatsächliche PostgreSQL-Regeln; der externe Discord-Login muss am eigenen Projekt geprüft werden.
 
 Am 19.10.2026 wurde der Nexville-Teamraum im verbundenen Supabase-Projekt angelegt und der Administratorzugriff für `470653391094415362` durch eine Datenbankabfrage bestätigt. Eine erneute Erstanlage ist dort nicht erforderlich.
+
+Migration 008 hinterlegt diese internen Kontonamen automatisch: `470653391094415362` → Smok, `622043290321289216` → HAZE, `480337195878711307` → Soon, `305666557219176449` → Apx, `433674403394486275` → Ivy. Sie gelten für Einstellungen und Autorenangaben im Verlauf. Das gemeinsame Profilbild ist `public/brand/nexville-avatar.gif`; die Animation bleibt unverändert.
+
+Im bereits verbundenen Projekt sind die Migrationen 007 und 008 ausgeführt. Für neue Installationen alle acht Migrationen anwenden. Die Website-Kontorolle Administrator erlaubt die Verwaltung aller Module; ausschließlich die Teamränge Projektleitung und Management sind von Verwarnungen ausgeschlossen.

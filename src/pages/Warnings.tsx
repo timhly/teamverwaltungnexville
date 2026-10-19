@@ -13,6 +13,8 @@ import {
 import { CreateForm, nullable, text } from "../components/forms";
 import { useStore } from "../lib/store";
 import { berlinDay, date, warningActive } from "../lib/utils";
+import { Select } from "../components/Select";
+import { WARNING_LEVELS, warningProtectedRole } from "../lib/warnings";
 
 export default function Warnings() {
   const { data, can, save, create } = useStore();
@@ -26,6 +28,10 @@ export default function Warnings() {
   const [historyMember, setHistoryMember] = useState("");
   const [selectedId, setSelectedId] = useState("");
   const selected = data.warning_status.find((w) => w.id === selectedId);
+  const protection = (id: string) =>
+    warningProtectedRole(id, data.roles, data.member_roles);
+  const selectedEditable =
+    editable && !!selected && !protection(selected.member_id);
   const activeFor = (id: string) =>
     data.warning_status
       .filter((w) => w.member_id === id && warningActive(w))
@@ -43,6 +49,7 @@ export default function Warnings() {
     setPage(0);
   }, [search, filter]);
   const openNew = (member = "", nextLevel = "1") => {
+    if (member && protection(member)) return;
     setNewMember(member);
     setLevel(nextLevel);
     setIsNew(true);
@@ -60,6 +67,13 @@ export default function Warnings() {
             <Plus size={18} /> Verwarnung eintragen
           </Button>
         )}
+      </div>
+      <div className="notice warning-protection-note">
+        <ShieldCheck size={20} />
+        <div>
+          <strong>Projektleitung & Management sind geschützt</strong>
+          <p>Diese Ränge können keine Verwarnungen erhalten.</p>
+        </div>
       </div>
       <div className="warning-summary">
         {[1, 2, 3].map((n) => (
@@ -87,17 +101,16 @@ export default function Warnings() {
               aria-label="Verwarntes Mitglied suchen"
             />
           </div>
-          <select
+          <Select
             value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            aria-label="Nach Verwarnungsstufe filtern"
-          >
-            <option value="all">Alle Mitglieder</option>
-            <option value="none">Keine Verwarnung</option>
-            <option value="1">Warn 1</option>
-            <option value="2">Warn 2</option>
-            <option value="3">Warn 3</option>
-          </select>
+            onValueChange={setFilter}
+            label="Nach Verwarnungsstufe filtern"
+            options={[
+              { value: "all", label: "Alle Mitglieder" },
+              { value: "none", label: "Keine Verwarnung" },
+              ...WARNING_LEVELS.slice(1),
+            ]}
+          />
         </div>
         <div className="table-scroll">
           <table>
@@ -113,6 +126,7 @@ export default function Warnings() {
             <tbody>
               {members.slice(page * 10, page * 10 + 10).map((m) => {
                 const w = activeFor(m.id)[0];
+                const protectedRole = protection(m.id);
                 return (
                   <tr key={m.id}>
                     <td>
@@ -126,29 +140,35 @@ export default function Warnings() {
                       {w?.info && <small>{w.info}</small>}
                     </td>
                     <td>
-                      <select
-                        className={`warning-select warn-${w?.level || 0}`}
-                        value={w?.level || 0}
-                        disabled={!editable}
-                        aria-label={`Verwarnungsstufe ${m.name}`}
-                        onChange={async (e) => {
-                          const val = e.target.value;
-                          if (val === "0") {
-                            if (
-                              window.confirm(
-                                `Alle aktiven Verwarnungen für ${m.name} aufheben? Die Historie bleibt erhalten.`,
+                      {protectedRole ? (
+                        <div className="warning-protected">
+                          <Badge tone="teal">
+                            <ShieldCheck size={14} /> Geschützt
+                          </Badge>
+                          <small>{protectedRole.name}</small>
+                        </div>
+                      ) : (
+                        <Select
+                          className={`warning-select warn-${w?.level || 0}`}
+                          value={String(w?.level || 0)}
+                          disabled={!editable}
+                          label={`Verwarnungsstufe ${m.name}`}
+                          options={WARNING_LEVELS}
+                          onValueChange={async (val) => {
+                            if (val === "0") {
+                              if (
+                                window.confirm(
+                                  `Alle aktiven Verwarnungen für ${m.name} aufheben? Die Historie bleibt erhalten.`,
+                                )
                               )
-                            )
-                              for (const warn of activeFor(m.id))
-                                await save("warnings", warn, { revoked: true });
-                          } else openNew(m.id, val);
-                        }}
-                      >
-                        <option value="0">Keine Verwarnung</option>
-                        <option value="1">Warn 1</option>
-                        <option value="2">Warn 2</option>
-                        <option value="3">Warn 3</option>
-                      </select>
+                                for (const warn of activeFor(m.id))
+                                  await save("warnings", warn, {
+                                    revoked: true,
+                                  });
+                            } else openNew(m.id, val);
+                          }}
+                        />
+                      )}
                     </td>
                     <td className="nowrap muted">
                       {w ? (
@@ -202,6 +222,12 @@ export default function Warnings() {
           onCancel={() => setIsNew(false)}
           submitLabel="Verwarnung eintragen"
           onSubmit={async (f) => {
+            const member = text(f, "member_id");
+            if (!member) throw new Error("Bitte ein Mitglied auswählen.");
+            if (protection(member))
+              throw new Error(
+                "Projektleitung und Management können keine Verwarnungen erhalten.",
+              );
             const start = text(f, "starts_on"),
               end = nullable(f, "expires_on");
             if (end && end < start)
@@ -209,7 +235,7 @@ export default function Warnings() {
                 "Das Ablaufdatum darf nicht vor dem Startdatum liegen.",
               );
             await create("warnings", {
-              member_id: text(f, "member_id"),
+              member_id: member,
               level: Number(text(f, "level")),
               reason: text(f, "reason"),
               info: text(f, "info"),
@@ -219,24 +245,31 @@ export default function Warnings() {
             setIsNew(false);
           }}
         >
-          <Field label="Mitglied">
-            <select name="member_id" required defaultValue={newMember}>
-              <option value="">Mitglied auswählen</option>
-              {data.team_members
-                .filter((m) => m.status !== "archived")
-                .map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.name}
-                  </option>
-                ))}
-            </select>
+          <Field
+            label="Mitglied"
+            hint="Projektleitung und Management sind von Verwarnungen ausgeschlossen."
+          >
+            <Select
+              name="member_id"
+              label="Mitglied"
+              placeholder="Mitglied auswählen"
+              required
+              value={newMember}
+              onValueChange={setNewMember}
+              options={data.team_members
+                .filter((m) => m.status !== "archived" && !protection(m.id))
+                .map((m) => ({ value: m.id, label: m.name }))}
+            />
           </Field>
           <Field label="Verwarnungsstufe">
-            <select name="level" defaultValue={level}>
-              <option value="1">Warn 1</option>
-              <option value="2">Warn 2</option>
-              <option value="3">Warn 3</option>
-            </select>
+            <Select
+              name="level"
+              label="Verwarnungsstufe"
+              value={level}
+              onValueChange={setLevel}
+              options={WARNING_LEVELS.slice(1)}
+              className={`warn-${level}`}
+            />
           </Field>
           <Field label="Grund">
             <textarea name="reason" required rows={3} maxLength={5000} />
@@ -322,28 +355,24 @@ export default function Warnings() {
         {selected && (
           <div className="form-stack">
             <Field label="Stufe">
-              <select
-                value={selected.level}
-                disabled={!editable}
-                onChange={(e) =>
+              <Select
+                label="Stufe"
+                options={WARNING_LEVELS.slice(1)}
+                value={String(selected.level)}
+                disabled={!selectedEditable}
+                onValueChange={(value) =>
                   void save("warnings", selected, {
-                    level: Number(e.target.value),
+                    level: Number(value),
                   })
                 }
-              >
-                {[1, 2, 3].map((n) => (
-                  <option value={n} key={n}>
-                    Warn {n}
-                  </option>
-                ))}
-              </select>
+              />
             </Field>
             <Field label="Grund">
               <AutoInput
                 label={`Verwarnungsgrund ${selected.id}`}
                 value={selected.reason}
                 multiline
-                disabled={!editable}
+                disabled={!selectedEditable}
                 onSave={(reason) => save("warnings", selected, { reason })}
               />
             </Field>
@@ -353,7 +382,7 @@ export default function Warnings() {
                   type="date"
                   value={selected.starts_on}
                   label={`Verwarnungsstart ${selected.id}`}
-                  disabled={!editable}
+                  disabled={!selectedEditable}
                   onSave={(starts_on) =>
                     save("warnings", selected, { starts_on })
                   }
@@ -364,7 +393,7 @@ export default function Warnings() {
                   type="date"
                   value={selected.expires_on || ""}
                   label={`Verwarnungsende ${selected.id}`}
-                  disabled={!editable}
+                  disabled={!selectedEditable}
                   onSave={(expires_on) =>
                     save("warnings", selected, {
                       expires_on: expires_on || null,
@@ -378,7 +407,7 @@ export default function Warnings() {
                 multiline
                 value={selected.info}
                 label={`Verwarnungsinfo ${selected.id}`}
-                disabled={!editable}
+                disabled={!selectedEditable}
                 onSave={(info) => save("warnings", selected, { info })}
               />
             </Field>

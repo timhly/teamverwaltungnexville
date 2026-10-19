@@ -74,7 +74,7 @@ export default function Members() {
               {data.team_members.filter((m) => m.status !== "archived").length}
             </span>
           </h1>
-          <p>Ein Team, viele Talente. Hier läuft alles zusammen.</p>
+          <p>Mitglieder, Ränge und Zusatzrollen verwalten.</p>
         </div>
         <div className="heading-actions">
           <Button

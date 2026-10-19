@@ -82,7 +82,7 @@ export default function Meetings() {
         <div>
           <span className="eyebrow">GEMEINSAM WEITERDENKEN</span>
           <h1>Teambesprechungen</h1>
-          <p>Von der ersten Idee bis zum gemeinsamen Beschluss.</p>
+          <p>Termine, Themen und Anwesenheit an einem Ort.</p>
         </div>
         {editable && (
           <Button

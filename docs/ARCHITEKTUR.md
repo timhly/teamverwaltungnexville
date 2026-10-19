@@ -40,3 +40,9 @@ Die Outbox sendet in Reihenfolge. Jede Operation liegt separat in IndexedDB, dam
 Die Browserumgebung erhält ausschließlich den öffentlichen Supabase-Key. Auth prüft die Sitzung; RLS filtert Leser. Direkte Tabellenwrites sind entzogen. Security-Definer-Funktionen verwenden einen leeren `search_path`, explizite Schemaangaben und eingeschränkte EXECUTE-Grants. Die Oberfläche bietet ausschließlich Discord als Anmeldeweg an. Der gehostete E-Mail-Anbieter wird separat in Supabase deaktiviert. Vorhandene Einladungsfunktionen bleiben als ungenutzter Altbestand erhalten.
 
 Backups und Wiederherstellung wurden vom Auftraggeber zurückgestellt und sind nicht Teil dieser Architekturversion.
+
+## Verwarnungsschutz und feste Kontonamen
+
+`roles.warning_exempt` wird serverseitig ausschließlich aus den Namen Projektleitung und Management abgeleitet. Die Mutation erlaubt kein direktes Ändern des Flags. Ein Warning-Trigger sperrt sämtliche Neuanlagen und Wiederaktivierungen für geschützte Mitglieder, auch mit Administratorrechten. Rollenänderungen und neue Verwarnungen werden über den Mitgliedsdatensatz serialisiert. Beim Zuweisen eines geschützten Rangs werden nicht aufgehobene Einträge widerrufen und weiterhin historisiert.
+
+`discord_display_names` enthält die fünf festgelegten Kontonamen. Die Konfiguration ist nur dem Datenbankeigentümer zugänglich. Der Profiltrigger prüft die tatsächliche Discord-Identität und übernimmt den festen Namen. Neue Audit-Ereignisse verwenden ihn automatisch. Migration 008 stellt vorhandene Autorenanzeigen um und erhält Akteur-ID, Zeitstempel sowie Vorher-/Nachher-Inhalte. Providerdaten bei Discord werden nicht geändert.

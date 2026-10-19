@@ -19,6 +19,8 @@ export async function database() {
     "202610190004_rank_order.sql",
     "202610190005_discord_access.sql",
     "202610190006_discord_admins.sql",
+    "202610190007_warning_protection.sql",
+    "202610190008_display_names.sql",
   ])
     await db.exec(
       await readFile(
