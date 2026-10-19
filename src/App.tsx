@@ -46,7 +46,7 @@ function Workspace() {
                     <div>
                       <span className="eyebrow">VERWALTUNG</span>
                       <h1>Backups</h1>
-                      <p>Auf deinen Wunsch vorerst zurückgestellt.</p>
+                      <p>Ist noch in Planung - Backups kommen bald wenn ich Lust und Zeit dafür habe lg Smok</p>
                     </div>
                   </div>
                   <Empty title="Backup-System noch nicht eingerichtet">
