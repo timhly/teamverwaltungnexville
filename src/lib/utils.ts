@@ -122,7 +122,10 @@ export function downloadBlob(filename: string, blob: Blob) {
 }
 export function errorMessage(error: unknown) {
   const e = error as { message?: string; code?: string };
-  if (e.code === "40001" || e.message?.includes("CONFLICT"))
+  if (
+    ["PT409", "40001"].includes(e.code || "") ||
+    e.message?.includes("CONFLICT")
+  )
     return "Dieser Datensatz wurde von jemand anderem geändert. Bitte den Konflikt auflösen.";
   if (e.code === "23505")
     return "Dieser Name oder diese Abkürzung ist bereits vergeben.";

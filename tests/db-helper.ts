@@ -21,6 +21,7 @@ export async function database() {
     "202610190006_discord_admins.sql",
     "202610190007_warning_protection.sql",
     "202610190008_display_names.sql",
+    "202610190009_conflict_http_status.sql",
   ])
     await db.exec(
       await readFile(

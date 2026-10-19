@@ -119,14 +119,16 @@ export class SyncQueue {
         } catch (err) {
           const e = err as { code?: string; message?: string; status?: number };
           this.error = e.message || "Verbindung fehlgeschlagen.";
-          this.state = e.code === "40001" ? "conflict" : "error";
+          this.state = ["PT409", "40001"].includes(e.code || "")
+            ? "conflict"
+            : "error";
           // Retry only transient failures. Validation/authorization failures remain visible.
           const transient =
             !e.code ||
             e.code.startsWith("08") ||
             e.code === "57014" ||
             (e.status ?? 0) >= 500;
-          if (transient && !this.stopped) {
+          if (this.state !== "conflict" && transient && !this.stopped) {
             this.timer = setTimeout(
               () => {
                 void this.flush();

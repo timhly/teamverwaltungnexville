@@ -244,7 +244,7 @@ describe("PostgreSQL: migrations, permissions and transactional mutations", () =
       await mutate("team_wishes", id, 1, { title: "First editor" });
       await expect(
         mutate("team_wishes", id, 1, { title: "Stale editor" }),
-      ).rejects.toHaveProperty("code", "40001");
+      ).rejects.toHaveProperty("code", "PT409");
       expect(
         (
           await rows("select title from public.team_wishes where id=$1", [id])

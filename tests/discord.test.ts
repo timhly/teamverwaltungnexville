@@ -158,7 +158,7 @@ describe("Discord identities and administrator access approval", () => {
     await asUser(db, ADMIN, async () => {
       await expect(
         review(req.id, req.version, "approved", "admin"),
-      ).rejects.toHaveProperty("code", "40001");
+      ).rejects.toHaveProperty("code", "PT409");
     });
     expect(
       (

@@ -70,21 +70,24 @@ describe("persistent outbox", () => {
     expect(second.state).toBe("saved");
     second.stop();
   });
-  it("stops at a conflict and never sends the dependent edit", async () => {
-    const send = vi.fn(async () => {
-      throw { code: "40001", message: "CONFLICT" };
-    });
-    const q = new SyncQueue(storage(), send, () => {});
-    await q.init();
-    await q.enqueue(mutation());
-    await settle();
-    await q.enqueue(mutation(2));
-    await settle();
-    expect(q.state).toBe("conflict");
-    expect(send).toHaveBeenCalledTimes(1);
-    expect(q.items).toHaveLength(2);
-    q.stop();
-  });
+  it.each(["PT409", "40001"])(
+    "stops at conflict %s and never sends the dependent edit",
+    async (code) => {
+      const send = vi.fn(async () => {
+        throw { code, message: "CONFLICT" };
+      });
+      const q = new SyncQueue(storage(), send, () => {});
+      await q.init();
+      await q.enqueue(mutation());
+      await settle();
+      await q.enqueue(mutation(2));
+      await settle();
+      expect(q.state).toBe("conflict");
+      expect(send).toHaveBeenCalledTimes(1);
+      expect(q.items).toHaveLength(2);
+      q.stop();
+    },
+  );
   it("drops all dependent edits when explicitly choosing the server version", async () => {
     const q = new SyncQueue(
       storage(),

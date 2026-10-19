@@ -326,7 +326,11 @@ const api = http.createServer((req, res) => {
             details: null,
             hint: null,
           },
-          error.code === "40001" ? 409 : 400,
+          /^PT\d{3}$/.test(error.code || "")
+            ? Number(error.code.slice(2))
+            : error.code === "40001"
+              ? 500
+              : 400,
         );
       }
     });

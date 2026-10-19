@@ -35,6 +35,8 @@ flowchart LR
 
 Die Outbox sendet in Reihenfolge. Jede Operation liegt separat in IndexedDB, damit neue Vorgänge anderer Tabs nicht durch eine komplette Warteschlangenüberschreibung verschwinden. Die Anwendung bestätigt Erfolg nach Serverantwort und Aktualisierung der Daten. Lokale Fehler und Versionskonflikte behalten die Entwürfe. Es gibt kein automatisches „letzter Schreibvorgang gewinnt“.
 
+Fachliche Versionskonflikte verwenden `PT409` und damit HTTP 409. Der frühere Code `40001` führte in PostgREST 14 zu unbegrenzten internen Wiederholungen. Migration 009 korrigiert beide betroffenen RPC-Funktionen und erhält alle anderen Funktionsinhalte und Grants. Der Client zeigt `PT409` als Konflikt an, stoppt abhängige Änderungen und plant keine automatische Wiederholung. Alte `40001`-Antworten bleiben für die Übergangszeit als Konflikte verständlich.
+
 ## Sicherheitsgrenze
 
 Die Browserumgebung erhält ausschließlich den öffentlichen Supabase-Key. Auth prüft die Sitzung; RLS filtert Leser. Direkte Tabellenwrites sind entzogen. Security-Definer-Funktionen verwenden einen leeren `search_path`, explizite Schemaangaben und eingeschränkte EXECUTE-Grants. Die Oberfläche bietet ausschließlich Discord als Anmeldeweg an. Der gehostete E-Mail-Anbieter wird separat in Supabase deaktiviert. Vorhandene Einladungsfunktionen bleiben als ungenutzter Altbestand erhalten.

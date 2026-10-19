@@ -59,12 +59,15 @@ Bis die nächsten Schritte erledigt sind, siehst du die Einrichtungsansicht. Es 
    6. `supabase/migrations/202610190006_discord_admins.sql`
    7. `supabase/migrations/202610190007_warning_protection.sql`
    8. `supabase/migrations/202610190008_display_names.sql`
+   9. `supabase/migrations/202610190009_conflict_http_status.sql`
 
 4. Unter **Authentication → Sign In / Providers** den Discord-Anbieter aktivieren und den E-Mail-Anbieter deaktivieren. **Allow new users to sign up** muss für die erste Discord-Anmeldung eingeschaltet sein; die lokale Konfiguration erlaubt dies bereits. Das erstellt nur ein Auth-Konto. Teamzugriff wird separat über die Datenbank geprüft. Discord Client ID und Client Secret nach [dieser Anleitung](docs/DISCORD.md) ausschließlich bei Supabase hinterlegen.
 5. Unter **Authentication → URL Configuration** als Site URL zunächst deine Entwicklungsadresse setzen. Die Entwicklungsadresse und später die vollständige Render-Adresse als erlaubte Redirect URLs hinzufügen, jeweils mit abschließendem `/`. Bei GitHub Pages gehört auch der Repository-Pfad dazu.
 6. Unter **Authentication → Sign In / Providers → Email** **Enable Email provider** ausschalten. Das gehostete Projekt muss separat eingestellt werden; ein Render-Deployment ändert diese Auth-Einstellung nicht.
 
 Die Datenbank prüft Teamzugriff und Schreibrechte zusätzlich zu den Auth-Einstellungen. Ein Auth-Konto allein erhält keinerlei Teamdaten. RLS bleibt auf allen Anwendungstabellen eingeschaltet. Siehe [Supabase: Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security).
+
+Alle neun Migrationen anwenden. Migration 009 verwendet für Versionskonflikte `PT409` (HTTP 409), damit PostgREST 14 diese fachlichen Konflikte nicht endlos als `40001` wiederholt. Sie erhält Versionsprüfung, Audit, Berechtigungen und Idempotenz. Siehe [Supabase: Endlosschleifen bei eigenen 40001-Fehlern](https://supabase.com/docs/guides/troubleshooting/high-cpu-and-infinite-transaction-retries-when-using-custom-error-codes-in-rpc-functions-77326b).
 
 ### Ersten Administrator anlegen
 

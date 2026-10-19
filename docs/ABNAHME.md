@@ -1,6 +1,6 @@
 # Abnahmeprotokoll · Nexville Roleplay
 
-Stand: 19.10.2026. Im verbundenen Supabase-Projekt wurden alle acht Migrationen angewendet, der Nexville-Teamraum mit neun Ausgangsmitgliedern angelegt und Administratorrechte sowie Anzeigename „Smok“ für Discord-ID `470653391094415362` per Datenbankabfrage bestätigt. ApX und Soon haben ihre geschützten Ränge und keine unaufgehobenen Verwarnungen. Die vollständige produktive Konfiguration wurde nicht geprüft. Die lokalen Ergebnisse beziehen sich auf den ausgelieferten Code und die PostgreSQL-Testumgebung.
+Stand: 19.10.2026. Im verbundenen Supabase-Projekt wurden alle neun Migrationen angewendet, der Nexville-Teamraum mit neun Ausgangsmitgliedern angelegt und Administratorrechte sowie Anzeigename „Smok“ für Discord-ID `470653391094415362` per Datenbankabfrage bestätigt. ApX und Soon haben ihre geschützten Ränge und keine unaufgehobenen Verwarnungen. Die vollständige produktive Konfiguration wurde nicht geprüft. Die lokalen Ergebnisse beziehen sich auf den ausgelieferten Code und die PostgreSQL-Testumgebung.
 
 ## Lokal überprüft
 
@@ -49,7 +49,11 @@ Stand: 19.10.2026. Im verbundenen Supabase-Projekt wurden alle acht Migrationen 
 | Alle fünf festen Discord-Anzeigenamen und Autorenangaben neuer/geänderter Logs | Datenbanktests erfolgreich |
 | Gemeinsames Profil-GIF mit 320 × 320 Pixeln und 171 Frames | Originaldatei und Browserabruf geprüft |
 
-Reproduzieren mit `npm test`, `npm run test:e2e` und `npm run build`. Die Suite umfasst 65 Unit-/Datenbanktests und 14 Browsertests, einschließlich sofortigem Neuladen vor Ablauf der Speicherpause und einem konkurrierenden Serverwrite. Der Browserbericht dokumentiert die Szenarien und ihre Screenshots. Auth-Antworten und Discord-Weiterleitungen sind lokale Test-Fixtures; diese Tests ersetzen keine Prüfung an Discord und dem echten Supabase-Projekt.
+Reproduzieren mit `npm test`, `npm run test:e2e` und `npm run build`. Die Suite umfasst 66 Unit-/Datenbanktests und 14 Browsertests, einschließlich sofortigem Neuladen vor Ablauf der Speicherpause und einem konkurrierenden Serverwrite. Konfliktantworten werden als `PT409` geprüft; auch alte `40001`-Antworten stoppen die lokale Warteschlange. Der Browserbericht dokumentiert die Szenarien und ihre Screenshots. Auth-Antworten und Discord-Weiterleitungen sind lokale Test-Fixtures; diese Tests ersetzen keine Prüfung an Discord und dem echten Supabase-Projekt.
+
+## Behobener API-Timeout am 19.10.2026
+
+Die direkten SQL-Abfragen funktionierten, während die öffentliche Daten-API nach 20 Sekunden abgebrochen werden musste. PostgREST 14.18 wiederholte `mutate`-Aufrufe mit dem bisherigen fachlichen Fehlercode `40001` fortlaufend. Migration 009 ersetzt ausschließlich diesen Code in `mutate` und `review_access_request` durch `PT409`. Nach Anwendung antworteten die REST-Leseendpunkte in etwa 70–80 ms mit dem erwarteten HTTP 401 für anonyme Aufrufer; die blockierten PostgREST-Verbindungen waren frei. Die Website und ihr JavaScript-Bundle lieferten HTTP 200. Es wurden keine Nutzerdatensätze gelöscht oder lokale Entwürfe verworfen.
 
 ## Noch nicht verifiziert
 
