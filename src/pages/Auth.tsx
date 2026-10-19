@@ -1,8 +1,5 @@
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 import {
-  ArrowRight,
-  Check,
-  ChevronRight,
   KeyRound,
   LoaderCircle,
   LockKeyhole,
@@ -10,8 +7,8 @@ import {
   ShieldCheck,
   Users,
 } from "lucide-react";
-import { configured, supabase } from "../lib/supabase";
-import { Button, Field } from "../components/ui";
+import { configured } from "../lib/supabase";
+import { Button } from "../components/ui";
 import { errorMessage } from "../lib/utils";
 import { connectDiscord } from "../lib/discord";
 
@@ -26,59 +23,9 @@ export function Brand() {
     </div>
   );
 }
-export function Auth({
-  setPassword = false,
-  onPasswordSet,
-  initialError = "",
-}: {
-  setPassword?: boolean;
-  onPasswordSet?: () => void;
-  initialError?: string;
-}) {
+export function Auth({ initialError = "" }: { initialError?: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(initialError);
-  const [message, setMessage] = useState("");
-  const [reset, setReset] = useState(false);
-  const submit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    setBusy(true);
-    setError("");
-    setMessage("");
-    try {
-      const email = String(form.get("email") || "").trim();
-      const password = String(form.get("password") || "");
-      if (setPassword) {
-        if (password !== form.get("confirm"))
-          throw new Error("Die Passwörter stimmen nicht überein.");
-        const { error } = await supabase!.auth.updateUser({ password });
-        if (error) throw error;
-        sessionStorage.removeItem("nexville:set-password");
-        onPasswordSet?.();
-      } else if (reset) {
-        const { error } = await supabase!.auth.resetPasswordForEmail(email, {
-          redirectTo: location.origin + import.meta.env.BASE_URL,
-        });
-        if (error) throw error;
-        setMessage(
-          "Falls ein Konto existiert, erhältst du eine E-Mail zum Zurücksetzen.",
-        );
-      } else {
-        const { error } = await supabase!.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error)
-          throw new Error(
-            "Anmeldung fehlgeschlagen. Bitte E-Mail, Passwort und die Kontofreigabe prüfen.",
-          );
-      }
-    } catch (e) {
-      setError(errorMessage(e));
-    } finally {
-      setBusy(false);
-    }
-  };
   return (
     <div className="auth-layout">
       <div className="auth-story">
@@ -136,7 +83,7 @@ export function Auth({
                   <div>
                     <strong>Administrator anlegen</strong>
                     <p>
-                      Konto per Einladung erstellen und das Team mit{" "}
+                      Mit Discord anmelden und das Team mit{" "}
                       <code>provision_team</code> initialisieren.
                     </p>
                   </div>
@@ -170,121 +117,36 @@ export function Auth({
                 <LockKeyhole size={25} />
               </span>
               <span className="eyebrow">NEXVILLE INTERN</span>
-              <h2>
-                {setPassword
-                  ? "Dein Zugang zu Nexville."
-                  : reset
-                    ? "Passwort vergessen?"
-                    : "Schön, dass du da bist."}
-              </h2>
+              <h2>Schön, dass du da bist.</h2>
               <p className="auth-intro">
-                {setPassword
-                  ? "Lege dein persönliches Passwort fest."
-                  : reset
-                    ? "Wir senden dir einen sicheren Link per E-Mail."
-                    : "Melde dich an, um deinen Teamraum zu öffnen."}
+                Melde dich mit Discord an, um deinen Teamraum zu öffnen.
               </p>
               {error && (
                 <div className="notice notice-error" role="alert">
                   {error}
                 </div>
               )}
-              {!setPassword && !reset && (
-                <>
-                  <Button
-                    className="discord-button"
-                    disabled={busy}
-                    onClick={async () => {
-                      setBusy(true);
-                      setError("");
-                      sessionStorage.removeItem("nexville:set-password");
-                      try {
-                        await connectDiscord();
-                      } catch (e) {
-                        setError(errorMessage(e));
-                        setBusy(false);
-                      }
-                    }}
-                  >
-                    <MessageCircle size={19} /> Mit Discord anmelden
-                  </Button>
-                  <div className="auth-divider">
-                    <span>oder mit E-Mail</span>
-                  </div>
-                </>
-              )}
-              <form className="form-stack" onSubmit={submit}>
-                {!setPassword && (
-                  <Field label="E-Mail-Adresse">
-                    <input
-                      name="email"
-                      type="email"
-                      placeholder="du@beispiel.de"
-                      autoComplete="username"
-                      required
-                    />
-                  </Field>
+              <Button
+                className="discord-button"
+                disabled={busy}
+                onClick={async () => {
+                  setBusy(true);
+                  setError("");
+                  try {
+                    await connectDiscord();
+                  } catch (e) {
+                    setError(errorMessage(e));
+                    setBusy(false);
+                  }
+                }}
+              >
+                {busy ? (
+                  <LoaderCircle className="spin" size={19} />
+                ) : (
+                  <MessageCircle size={19} />
                 )}
-                {(!reset || setPassword) && (
-                  <Field label={setPassword ? "Neues Passwort" : "Passwort"}>
-                    <input
-                      name="password"
-                      type="password"
-                      minLength={setPassword ? 12 : 1}
-                      placeholder={
-                        setPassword ? "Mindestens 12 Zeichen" : "Dein Passwort"
-                      }
-                      autoComplete={
-                        setPassword ? "new-password" : "current-password"
-                      }
-                      required
-                    />
-                  </Field>
-                )}
-                {setPassword && (
-                  <Field label="Passwort wiederholen">
-                    <input
-                      name="confirm"
-                      type="password"
-                      minLength={12}
-                      autoComplete="new-password"
-                      required
-                    />
-                  </Field>
-                )}
-                {message && (
-                  <div className="notice notice-success" role="status">
-                    <Check size={18} />
-                    {message}
-                  </div>
-                )}
-                <Button type="submit" disabled={busy}>
-                  {busy ? (
-                    <LoaderCircle className="spin" size={18} />
-                  ) : (
-                    <ArrowRight size={18} />
-                  )}
-                  {setPassword
-                    ? "Passwort festlegen"
-                    : reset
-                      ? "Link anfordern"
-                      : "Anmelden"}
-                </Button>
-                {!setPassword && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => {
-                      setReset((v) => !v);
-                      setMessage("");
-                      setError("");
-                    }}
-                  >
-                    {reset ? "Zurück zur Anmeldung" : "Passwort vergessen?"}
-                    <ChevronRight size={15} />
-                  </Button>
-                )}
-              </form>
+                {busy ? "Weiter zu Discord …" : "Mit Discord anmelden"}
+              </Button>
               <div className="auth-bottom">
                 <ShieldCheck size={15} /> Teamzugriff für freigegebene Konten.
               </div>

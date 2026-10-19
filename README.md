@@ -2,7 +2,7 @@
 
 Eine deutschsprachige Teamverwaltung mit React, TypeScript, Vite, Tailwind CSS, Radix-Dialogen im shadcn-Stil, Lucide und Supabase PostgreSQL/Auth. Das mitgelieferte Nexville-Banner wird unverändert verwendet. Schriftdateien liegen im Build; Google Fonts wird nicht angefragt.
 
-**Aktueller Stand:** Anwendungscode, Datenbankmigrationen, Discord-Anmeldung, Einladungscode und Tests liegen im [GitHub-Repository](https://github.com/timhly/teamverwaltungnexville). Render ist als Web Service vorbereitet. Die gehostete Supabase-/Discord-Konfiguration und der produktive Betrieb sind **noch nicht verifiziert**. Ohne Verbindung zeigt die Anwendung eine Einrichtungsansicht, keine erfundenen Teamdaten.
+**Aktueller Stand:** Anwendungscode, Datenbankmigrationen, Discord-Anmeldung und Tests liegen im [GitHub-Repository](https://github.com/timhly/teamverwaltungnexville). Render ist als Web Service vorbereitet. Die gehostete Supabase-/Discord-Konfiguration und der produktive Betrieb sind **noch nicht verifiziert**. Ohne Verbindung zeigt die Anwendung eine Einrichtungsansicht, keine erfundenen Teamdaten.
 
 **Discord einrichten:** Die vollständige Anleitung einschließlich der fünf direkt freigegebenen Administrator-IDs steht in [docs/DISCORD.md](docs/DISCORD.md).
 
@@ -24,7 +24,7 @@ Ansichten aus der lokalen Prüfung: [Desktop](docs/preview/desktop.png), [Smartp
 - Verwarnungen mit drei Stufen, Grund, Beginn, optionalem Ablauf, Informationen, Aufhebung und Historie. Keine aktive Verwarnung wird grün angezeigt.
 - Teamwünsche mit Beschreibung, Einreicher, Priorität, Status, Notizen, Archivierung und berechtigter Löschung.
 - Automatisches Speichern, dauerhafte lokale Warteschlange, sofort gesicherte Textentwürfe, Wiederholung vorübergehender Fehler, Versionsprüfung und verständliche Konfliktauflösung.
-- Login, Passwort-Zurücksetzen, Einladungsannahme, Passwortänderung, Administrator/Bearbeiter/Leser und gezielte Bearbeiterrechte pro Modul.
+- Anmeldung ausschließlich mit Discord, Administrator/Bearbeiter/Leser und gezielte Bearbeiterrechte pro Modul. E-Mail-/Passwortformulare und E-Mail-Einladungen werden in der Oberfläche nicht angeboten.
 - Discord-Anmeldung, Verknüpfung bestehender Konten und Zugangsanfragen mit bestätigter Discord-ID. Administratoren können Anfragen als Leser, Bearbeiter oder Administrator freigeben. Fünf ausdrücklich hinterlegte Discord-IDs erhalten im Nexville-Team direkt Administratorrechte.
 - Unveränderbares serverseitiges Audit-Log mit Vorher-/Nachher-Werten. Die Gesamtansicht lädt ältere Ereignisse seitenweise nach.
 - Globale Suche mit Strg+K, CSV-Export, Dark/Light Mode und mobile Navigation.
@@ -56,21 +56,23 @@ Bis die nächsten Schritte erledigt sind, siehst du die Einrichtungsansicht. Es 
    5. `supabase/migrations/202610190005_discord_access.sql`
    6. `supabase/migrations/202610190006_discord_admins.sql`
 
-4. Unter **Authentication → Sign In / Providers** den E-Mail-Anbieter und für Discord den Discord-Anbieter aktivieren. **Allow new users to sign up** muss für die erste Discord-Anmeldung eingeschaltet sein; die lokale Konfiguration erlaubt dies bereits. Das erstellt nur ein Auth-Konto. Teamzugriff wird separat über die Datenbank geprüft. Discord Client ID und Client Secret nach [dieser Anleitung](docs/DISCORD.md) ausschließlich bei Supabase hinterlegen.
+4. Unter **Authentication → Sign In / Providers** den Discord-Anbieter aktivieren und den E-Mail-Anbieter deaktivieren. **Allow new users to sign up** muss für die erste Discord-Anmeldung eingeschaltet sein; die lokale Konfiguration erlaubt dies bereits. Das erstellt nur ein Auth-Konto. Teamzugriff wird separat über die Datenbank geprüft. Discord Client ID und Client Secret nach [dieser Anleitung](docs/DISCORD.md) ausschließlich bei Supabase hinterlegen.
 5. Unter **Authentication → URL Configuration** als Site URL zunächst deine Entwicklungsadresse setzen. Die Entwicklungsadresse und später die vollständige Render-Adresse als erlaubte Redirect URLs hinzufügen, jeweils mit abschließendem `/`. Bei GitHub Pages gehört auch der Repository-Pfad dazu.
-6. Für Einladungen und Passwort-E-Mails einen eigenen SMTP-Versand einrichten. Versandlimits und Zustellbarkeit des Anbieters prüfen.
+6. Unter **Authentication → Sign In / Providers → Email** **Enable Email provider** ausschalten. Das gehostete Projekt muss separat eingestellt werden; ein Render-Deployment ändert diese Auth-Einstellung nicht.
 
 Die Datenbank prüft Teamzugriff und Schreibrechte zusätzlich zu den Auth-Einstellungen. Ein Auth-Konto allein erhält keinerlei Teamdaten. RLS bleibt auf allen Anwendungstabellen eingeschaltet. Siehe [Supabase: Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security).
 
 ### Ersten Administrator anlegen
 
-1. Im Supabase-Dashboard unter **Authentication → Users → Add user** dein eigenes Konto mit E-Mail und einem langen Passwort erstellen. Für dieses vom Administrator angelegte Konto die E-Mail bestätigen lassen oder bewusst als bestätigt anlegen. Das ist keine öffentliche Registrierung.
-2. Im SQL Editor die eigene E-Mail in folgendem Befehl einsetzen und ausführen:
+1. Discord nach [docs/DISCORD.md](docs/DISCORD.md) einrichten und einmal mit einer der fünf freigegebenen Administrator-IDs auf der Website anmelden.
+2. Falls noch kein Team vorhanden ist, im Supabase SQL Editor die eigene Discord-ID in folgendem Befehl einsetzen und **einmal** ausführen. Für ein bereits eingerichtetes Team diesen Schritt auslassen:
 
 ```sql
-select public.provision_team(id, 'Nexville Roleplay')
-from auth.users
-where lower(email) = lower('DEINE_EMAIL_ADRESSE');
+select public.provision_team(i.user_id, 'Nexville Roleplay')
+from auth.identities i
+where i.provider = 'discord'
+  and i.provider_id = 'DEINE_DISCORD_ID'
+  and not exists(select 1 from public.teams);
 ```
 
 Der Befehl gibt eine Team-UUID zurück. Er legt das Team, deinen Administratorzugriff, neun Ausgangsmitglieder und 21 Rollen an: acht Ränge, fünf Zusatzrollen und acht erhaltene Sonderrollen. Die Screenshot-Referenzzahlen bleiben separat; z. B. hat Administration anfangs tatsächlich keine Zuweisung, auch wenn der alte Referenzwert 2 lautet.
@@ -93,49 +95,15 @@ Den Entwicklungsserver danach neu starten. Mit dem eben angelegten Konto anmelde
 
 **Niemals** das Datenbankpasswort, einen `service_role`-JWT oder einen `sb_secret_`-Key als `VITE_`-Variable verwenden. `VITE_`-Werte werden absichtlich Teil des Browser-Bundles. Der Publishable Key ist öffentlich; die eigentliche Datensicherheit entsteht durch die geprüften Berechtigungen in PostgreSQL.
 
-## 3. Einladungen aktivieren
+## 3. Zugang per Discord freigeben
 
-Die Oberfläche unter Einstellungen ruft eine Supabase Edge Function auf. Der privilegierte Auth-Schlüssel liegt dabei ausschließlich serverseitig in Supabase.
+Die Website bietet ausschließlich Discord als Anmeldeweg. Es gibt keine E-Mail-/Passwortanmeldung, Passwortverwaltung oder E-Mail-Einladung in der Oberfläche.
 
-1. [Supabase CLI installieren](https://supabase.com/docs/guides/cli/getting-started).
-2. Im Projektordner anmelden und das Projekt verbinden:
+1. Neue Nutzer melden sich mit Discord an und wählen **Zugang anfragen**.
+2. Ein Administrator prüft unter **Einstellungen → Discord-Zugangsanfragen** die bestätigte Discord-ID und wählt Leser, Bearbeiter oder Administrator.
+3. Nach der Freigabe erscheint der Teamraum. Einzelne Bearbeiterrechte lassen sich anschließend unter **Zugänge & Berechtigungen** anpassen.
 
-```powershell
-npx supabase login
-npx supabase link --project-ref DEINE_PROJEKT_REFERENZ
-```
-
-3. Im Supabase-Dashboard unter **Edge Functions → Secrets** `SITE_URL` mit der vollständigen späteren Website-Adresse setzen, z. B. `https://teamverwaltungnexville.onrender.com/` (die tatsächlich von Render vergebene Adresse verwenden). Die Funktion verlangt HTTPS. Die üblichen Supabase-Runtime-Variablen für Projekt-URL, Anon- und Service-Role-Key werden von Supabase bereitgestellt; sie gehören nicht in `.env` des Frontends.
-4. Funktion bereitstellen:
-
-```powershell
-npx supabase functions deploy invite-user
-```
-
-5. Mit einem Administrator in der Anwendung **Einstellungen → Benutzer einladen** öffnen. Empfänger, Anzeigename und Zugriffsrolle wählen.
-
-`verify_jwt = false` in `supabase/config.toml` bedeutet hier, dass die Funktion den Bearer-Token selbst durch `auth.getUser()` validiert. Anschließend prüft sie die aktuelle Administratorberechtigung serverseitig. Sie vertraut weder einer im Browser behaupteten Rolle noch einer frei übergebenen Weiterleitungsadresse. Für Redirects wird nur die serverseitige `SITE_URL` verwendet.
-
-Beim Öffnen der Einladung setzt der Empfänger ein Passwort mit mindestens 12 Zeichen. Bei bereits bestehenden Auth-Konten kann Supabase eine erneute Einladung ablehnen; bestehende Konten lassen sich durch einen Administrator im SQL Editor dem Team zuordnen. Keine neuen Konten oder bestehenden Berechtigungen werden dabei heimlich überschrieben.
-
-Falls eine Einladungs-E-Mail erfolgreich versendet wurde, aber der anschließende Zugriffseintrag scheitert, den Supabase-Function-Log prüfen und den Zugriff über den SQL Editor nachtragen. Der Benutzer erhält ohne Zugriffseintrag keine Teamdaten.
-
-### Bestehendes Auth-Konto berechtigen oder Zugriff reparieren
-
-Nur im privilegierten SQL Editor verwenden. IDs und E-Mail vorher prüfen:
-
-```sql
-select public.grant_invited_access(
-  'TEAM_UUID'::uuid,
-  'EMPFÄNGER_AUTH_UUID'::uuid,
-  'empfaenger@beispiel.de',
-  'Anzeigename',
-  'viewer',
-  'ADMINISTRATOR_AUTH_UUID'::uuid
-);
-```
-
-Das ist eine Datenbank-Administratoraktion. Die Funktion prüft, dass Empfänger-ID und E-Mail übereinstimmen und der angegebene Administrator zum Team gehört. Bereits vorhandene Rechte werden nicht überschrieben; Änderungen erfolgen in der Anwendung.
+Die fünf direkt freigegebenen Discord-IDs benötigen keine Anfrage. Die vollständige Einrichtung, Kontoverknüpfung und erste Teamanlage beschreibt [docs/DISCORD.md](docs/DISCORD.md). Bestehende E-Mail-Konten und die früheren Einladungsfunktionen werden nicht gelöscht; sie bleiben für vorhandene Daten und Zuordnungen erhalten.
 
 ## 4. GitHub und Hosting
 
@@ -167,7 +135,7 @@ Alternativ kann Render die Einstellungen aus `render.yaml` über **New → Bluep
 
 Auch eine **Static Site** ist weiterhin möglich: gleicher Build Command, Publish Directory `dist`, kein Start Command. Die `render.yaml` ist jetzt auf den gewünschten Web Service eingestellt. Der kostenlose Web-Service-Tarif kann bei Inaktivität herunterfahren; für dauerhaft laufenden Betrieb einen passenden Tarif wählen.
 
-Bei Änderungen an den `VITE_`-Werten neu deployen, damit sie in den Build übernommen werden. Die endgültige Render-Adresse mit abschließendem `/` in Supabase als Site URL und erlaubte Redirect URL sowie beim Einladungsdienst als `SITE_URL` hinterlegen. Das Hash-Routing benötigt keine Rewrite-Regel.
+Bei Änderungen an den `VITE_`-Werten neu deployen, damit sie in den Build übernommen werden. Die endgültige Render-Adresse mit abschließendem `/` in Supabase als Site URL und erlaubte Redirect URL  hinterlegen. Das Hash-Routing benötigt keine Rewrite-Regel.
 
 Render kann neue Commits auf `main` automatisch veröffentlichen. Der zusätzliche GitHub-Pages-Workflow ist für dieses Hosting nur noch manuell startbar, damit er nicht bei jedem Render-Update ohne Pages-Konfiguration fehlschlägt.
 
@@ -199,7 +167,7 @@ Für eine eigene Domain oder ein Repository `DEINNAME.github.io` muss `VITE_BASE
 4. Unter **Settings → Pages → Build and deployment** als Quelle **GitHub Actions** auswählen.
 5. Für freigegebene Änderungen Branchschutz für `main`, Pull-Request-Reviews und erfolgreiche Checks einrichten. Bei Bedarf das Environment `github-pages` mit einem erforderlichen Reviewer schützen.
 6. Unter **Actions** den Pages-Workflow manuell starten. Er führt Datenbank-/Unit-Tests, Browsertests und den Produktionsbuild aus und veröffentlicht nur nach deren Erfolg.
-7. Die ausgegebene Pages-URL öffnen. Diese vollständige Adresse zusätzlich in Supabase als Site URL/Redirect URL und als Edge-Function-Secret `SITE_URL` hinterlegen.
+7. Die ausgegebene Pages-URL öffnen. Diese vollständige Adresse zusätzlich in Supabase als Site URL/Redirect URL  hinterlegen.
 
 Die Anwendung nutzt Hash-Routing, z. B. `/nexville-team/#/mitglieder`. Direkte Links und Neuladen benötigen dadurch keine Server-Rewrite-Regeln auf GitHub Pages. Der Vite-Basispfad gilt auch für das Banner und alle gebauten Assets. Grundlage: [Vite: GitHub Pages](https://vite.dev/guide/static-deploy.html#github-pages), [GitHub Pages Deployment Action](https://github.com/actions/deploy-pages).
 
@@ -225,7 +193,7 @@ Lokale Entwürfe sind an Benutzer, Team, Browser und Website-Adresse gebunden. S
 
 | Kontorolle | Rechte |
 |---|---|
-| Administrator | Alle Verwaltungsbereiche, Rollenanlegung/-löschung, Einladungen, Benutzerrechte und Workspace-Name |
+| Administrator | Alle Verwaltungsbereiche, Rollenanlegung/-löschung, Discord-Zugangsanfragen, Benutzerrechte und Workspace-Name |
 | Bearbeiter | Freigegebene Module; standardmäßig Mitglieder, Besprechungen, Verwarnungen und Wünsche |
 | Leseberechtigt | Teamdaten ansehen und lesende Exporte ausführen |
 
@@ -256,7 +224,7 @@ npm run build
 
 Die Playwright-Tests starten unter `127.0.0.1:5174` die reale React-Anwendung und unter `127.0.0.1:54329` einen **ausschließlich für Tests vorgesehenen Transportadapter**, der dieselben SQL-Funktionen und RLS-Regeln ausführt. Nur die Auth-Antworten werden dort als Test-Fixtures simuliert. Dieser Server wird nicht gebaut, nicht ausgeliefert und ist kein Produktionsbackend. Die in Tests enthaltenen `example.test`-Konten funktionieren ausschließlich dort.
 
-Damit sind lokale App-Abläufe und PostgreSQL-Regeln prüfbar, ohne ein fremdes Supabase-Konto zu erzeugen. Das beweist **nicht** den tatsächlichen E-Mail-Versand, die gehostete Supabase-Auth-Konfiguration, WebSocket-Realtime oder ein erfolgreiches GitHub-Deployment. Die müssen nach der Einrichtung zusätzlich geprüft werden.
+Damit sind lokale App-Abläufe und PostgreSQL-Regeln prüfbar, ohne ein fremdes Supabase-Konto zu erzeugen. Das beweist **nicht** den tatsächlichen Discord-Login, die gehostete Supabase-Auth-Konfiguration, WebSocket-Realtime oder ein erfolgreiches Render-Deployment. Die müssen nach der Einrichtung zusätzlich geprüft werden.
 
 Testberichte und Screenshots entstehen in `playwright-report/` und `test-results/` und werden nicht eingecheckt. Eine zusätzliche native Python-Playwright-Inspektion ist mit `tests/support/inspect_ui.py` gegen den laufenden isolierten Testserver möglich.
 
@@ -266,7 +234,7 @@ Siehe [docs/ABNAHME.md](docs/ABNAHME.md) für die dokumentierten lokalen Prüfer
 
 ## 8. Betrieb und Kosten
 
-Frontend: GitHub Pages. Datenbank, Anmeldung und Einladungsfunktion: Supabase. E-Mail-Versand: eigener SMTP-Anbieter.
+Frontend: Render. Datenbank und Discord-Anmeldung: Supabase.
 
 Zum geprüften Quellenstand am 19.10.2026 nennt Supabase einen kostenlosen Tarif mit Pausierung nach einer Woche Inaktivität und Pro ab 25 USD/Monat, abhängig von Compute, Verbrauch und Zusatzdiensten. Für den gewünschten dauerhaft verfügbaren Betrieb einen Tarif ohne automatische Inaktivitätspause wählen. Es besteht keine durch diesen Quellcode garantierte Verfügbarkeit. Aktuelle Preise und Kontingente vor Abschluss direkt auf der [Supabase-Preisseite](https://supabase.com/pricing) prüfen. GitHub-Tarif, private Repository-Nutzung, SMTP und etwaige Domains können weitere Kosten verursachen.
 
@@ -282,7 +250,7 @@ src/
 public/brand/       Unverändertes Nexville-GIF
 supabase/
   migrations/       Versioniertes relationales Schema, Rechte und Ausgangsdaten
-  functions/        Serverseitige Benutzer-Einladungen
+  functions/        Frühere Einladungsfunktion (kein Aufruf aus der Oberfläche)
 tests/              PostgreSQL-, Unit- und Browsertests
 .github/workflows/  Checks und GitHub-Pages-Deployment
 docs/               Abnahme und Architektur

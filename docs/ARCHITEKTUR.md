@@ -15,9 +15,6 @@ flowchart LR
   TX --> Audit[Audit-Log]
   TX --> Receipt[Idempotenzbeleg]
   Audit -->|RLS-gefiltertes Realtime-Ereignis| UI
-  UI -->|Admin + gültiger Bearer-Token| Edge[Einladungsfunktion]
-  Edge --> Auth
-  Edge -->|Serverinterner Schlüssel| Access[Geprüfte Kontoberechtigung]
 ```
 
 ## Tabellen
@@ -40,6 +37,6 @@ Die Outbox sendet in Reihenfolge. Jede Operation liegt separat in IndexedDB, dam
 
 ## Sicherheitsgrenze
 
-Die Browserumgebung erhält ausschließlich den öffentlichen Supabase-Key. Auth prüft die Sitzung; RLS filtert Leser. Direkte Tabellenwrites sind entzogen. Security-Definer-Funktionen verwenden einen leeren `search_path`, explizite Schemaangaben und eingeschränkte EXECUTE-Grants. Privilegierte Einladungen verwenden eine Edge Function mit geprüfter Auth-Sitzung und aktueller Administratorberechtigung.
+Die Browserumgebung erhält ausschließlich den öffentlichen Supabase-Key. Auth prüft die Sitzung; RLS filtert Leser. Direkte Tabellenwrites sind entzogen. Security-Definer-Funktionen verwenden einen leeren `search_path`, explizite Schemaangaben und eingeschränkte EXECUTE-Grants. Die Oberfläche bietet ausschließlich Discord als Anmeldeweg an. Der gehostete E-Mail-Anbieter wird separat in Supabase deaktiviert. Vorhandene Einladungsfunktionen bleiben als ungenutzter Altbestand erhalten.
 
 Backups und Wiederherstellung wurden vom Auftraggeber zurückgestellt und sind nicht Teil dieser Architekturversion.

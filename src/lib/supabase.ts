@@ -9,9 +9,6 @@ export const oauthCallbackError = authHash.has("error")
 if (oauthCallbackError)
   history.replaceState(null, "", location.pathname + location.search + "#/");
 
-if (/(?:type=invite|type=recovery)/.test(location.hash))
-  sessionStorage.setItem("nexville:set-password", "true");
-
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
 export const configured =

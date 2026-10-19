@@ -1,10 +1,8 @@
 import { test, expect, type Page } from "@playwright/test";
+import { loginAsDiscord } from "./helpers";
 
 async function login(page: Page, email = "admin@example.test") {
-  await page.goto("/");
-  await page.getByLabel("E-Mail-Adresse", { exact: true }).fill(email);
-  await page.getByLabel("Passwort", { exact: true }).fill("test-password-123");
-  await page.getByRole("button", { name: "Anmelden", exact: true }).click();
+  await loginAsDiscord(page, email);
   await expect(
     page.getByRole("heading", { name: "Alles für dein Team." }),
   ).toBeVisible();

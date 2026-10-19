@@ -74,9 +74,6 @@ function Workspace() {
 export function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(!!supabase);
-  const [password, setPassword] = useState(
-    () => sessionStorage.getItem("nexville:set-password") === "true",
-  );
   const [authError, setAuthError] = useState(oauthCallbackError);
   useEffect(() => {
     if (!supabase) return;
@@ -88,19 +85,10 @@ export function App() {
         if (error) setAuthError(error.message);
       }
     });
-    const { data } = supabase.auth.onAuthStateChange((event, current) => {
+    const { data } = supabase.auth.onAuthStateChange((_event, current) => {
       if (!mounted) return;
       setSession(current);
       setLoading(false);
-      if (event === "PASSWORD_RECOVERY") {
-        sessionStorage.setItem("nexville:set-password", "true");
-        setPassword(true);
-      }
-      if (
-        event === "SIGNED_IN" &&
-        sessionStorage.getItem("nexville:set-password") === "true"
-      )
-        setPassword(true);
     });
     return () => {
       mounted = false;
@@ -110,16 +98,6 @@ export function App() {
   if (loading) return <Loading>Dein Teamraum wird geöffnet …</Loading>;
   if (authError && !session) return <Auth initialError={authError} />;
   if (!session) return <Auth />;
-  if (password)
-    return (
-      <Auth
-        setPassword
-        onPasswordSet={() => {
-          setPassword(false);
-          location.hash = "#/";
-        }}
-      />
-    );
   return (
     <StoreProvider key={session.user.id} session={session}>
       <Workspace />

@@ -15,7 +15,8 @@ additional_redirect_urls = ["http://127.0.0.1:5173"]
 enable_signup = true
 minimum_password_length = 12
 [auth.email]
-enable_signup = true
+# Email registration is disabled; hosted email sign-in must also be disabled in the dashboard.
+enable_signup = false
 enable_confirmations = true
 [functions.invite-user]
 verify_jwt = false

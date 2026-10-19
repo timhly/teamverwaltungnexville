@@ -31,7 +31,9 @@ Grundlage: [Offizielle Supabase-Anleitung für Discord](https://supabase.com/doc
 
 ## 3. Anmeldung und Rückkehr zur Website erlauben
 
-Unter **Authentication → Sign In / Providers** beziehungsweise der allgemeinen Auth-Konfiguration **Allow new users to sign up** aktivieren. Supabase muss für die erste Discord-Anmeldung ein Auth-Konto erstellen dürfen. Unfreigegebene Konten erhalten dadurch keine Teamdaten; normale Nutzer können Zugang anfragen.
+Unter **Authentication → Sign In / Providers → Email** den Schalter **Enable Email provider** ausschalten. Die Website zeigt ausschließlich die Discord-Anmeldung; Passwortverwaltung und E-Mail-Einladungen wurden entfernt.
+
+In der allgemeinen Auth-Konfiguration **Allow new users to sign up** eingeschaltet lassen. Supabase muss für die erste Discord-Anmeldung ein Auth-Konto erstellen dürfen. Unfreigegebene Konten erhalten dadurch keine Teamdaten; normale Nutzer können Zugang anfragen.
 
 Unter **Authentication → URL Configuration**:
 
@@ -104,7 +106,7 @@ Solange eine ID in der Liste steht, setzt eine erneute Anmeldung ihren Administr
 
 ## 7. Bestehendes E-Mail-Konto mit Discord verbinden
 
-Wenn du schon mit E-Mail und Passwort arbeitest, zuerst in dieses bestehende Konto einloggen. In **Einstellungen → Mein Konto → Discord verbinden** Discord hinzufügen. So bleiben die bisherigen Rechte und der Anzeigename am selben Konto erhalten.
+Wenn du noch in einem bisherigen E-Mail-Konto angemeldet bist, in **Einstellungen → Dein Konto → Discord verbinden** Discord hinzufügen. So bleiben die bisherigen Rechte und der Anzeigename am selben Konto erhalten. Es gibt kein E-Mail-Anmeldeformular mehr. Falls keine bestehende Sitzung vorhanden ist und Discord ein getrenntes Konto erzeugt, kann ein Administrator das Discord-Konto über seine Zugangsanfrage freigeben; bestehende historische Daten bleiben erhalten.
 
 Dafür in Supabase unter den Auth-Einstellungen **Enable Manual Linking** aktivieren. Wenn diese Funktion deaktiviert ist, meldet die Anwendung den Fehler beim Verknüpfen. Siehe [Supabase: Identity Linking](https://supabase.com/docs/guides/auth/auth-identity-linking).
 
@@ -115,3 +117,5 @@ Für die übliche Installation mit einem Team ist keine zusätzliche Variable n�
 ## Prüfung nach der Einrichtung
 
 Mit einer freigegebenen Discord-ID anmelden und die Verwaltungsrechte prüfen. Danach ein anderes Discord-Konto anmelden, Zugang als Leser anfragen und freigeben. Zuletzt ein vorhandenes E-Mail-Konto über „Discord verbinden“ testen. Die automatisierten Tests verwenden eine simulierte Auth-Weiterleitung und tatsächliche PostgreSQL-Regeln; der externe Discord-Login muss am eigenen Projekt geprüft werden.
+
+Am 19.10.2026 wurde der Nexville-Teamraum im verbundenen Supabase-Projekt angelegt und der Administratorzugriff für `470653391094415362` durch eine Datenbankabfrage bestätigt. Eine erneute Erstanlage ist dort nicht erforderlich.

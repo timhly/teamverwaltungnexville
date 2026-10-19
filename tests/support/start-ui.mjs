@@ -27,6 +27,16 @@ async function fixture() {
     "insert into auth.identities(user_id,provider,provider_id,identity_data) values($1,'discord','470653391094415362','{\"full_name\":\"Discord Admin Fixture\"}')",
     [DISCORD_ADMIN],
   );
+  for (const [uid, did] of [
+    [ADMIN, "111111111111111111"],
+    [EDITOR, "222222222222222222"],
+    [VIEWER, "333333333333333333"],
+  ]) {
+    await result.db.query(
+      "insert into auth.identities(user_id,provider,provider_id) values($1,'discord',$2)",
+      [uid, did],
+    );
+  }
   return result;
 }
 let { db, team } = await fixture();
@@ -59,8 +69,8 @@ const user = (id, email) => ({
   role: "authenticated",
   email_confirmed_at: new Date().toISOString(),
   app_metadata: {
-    provider: id === OUTSIDER ? "discord" : "email",
-    providers: [id === OUTSIDER ? "discord" : "email"],
+    provider: "discord",
+    providers: ["discord"],
   },
   user_metadata: {},
   created_at: new Date().toISOString(),
@@ -127,9 +137,17 @@ const api = http.createServer((req, res) => {
             send({ message: "Unexpected test redirect" }, 400);
             return;
           }
+          const id =
+            identities[
+              url.searchParams.get("login_hint") || "discord@example.test"
+            ];
+          if (!id) {
+            send({ message: "Unknown test identity" }, 400);
+            return;
+          }
           target.hash = new URLSearchParams({
-            access_token: jwt(OUTSIDER),
-            refresh_token: `fixture-refresh-${OUTSIDER}`,
+            access_token: jwt(id),
+            refresh_token: `fixture-refresh-${id}`,
             expires_in: "3600",
             token_type: "bearer",
           }).toString();

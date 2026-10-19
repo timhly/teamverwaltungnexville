@@ -1,6 +1,6 @@
 # Abnahmeprotokoll · Nexville Roleplay
 
-Stand: 19.10.2026. Die produktive Konfiguration wurde nicht geprüft. Die lokalen Ergebnisse beziehen sich auf den ausgelieferten Code und die PostgreSQL-Testumgebung.
+Stand: 19.10.2026. Im verbundenen Supabase-Projekt wurden alle sechs Migrationen nachgewiesen, der Nexville-Teamraum mit neun Ausgangsmitgliedern angelegt und Administratorrechte für Discord-ID `470653391094415362` per Datenbankabfrage bestätigt. Die vollständige produktive Konfiguration wurde nicht geprüft. Die lokalen Ergebnisse beziehen sich auf den ausgelieferten Code und die PostgreSQL-Testumgebung.
 
 ## Lokal überprüft
 
@@ -36,7 +36,7 @@ Stand: 19.10.2026. Die produktive Konfiguration wurde nicht geprüft. Die lokale
 | Netzwerkabbruch, erhaltene Outbox, erfolgreiche spätere Synchronisierung | Im lokalen Browser geprüft |
 | Desktop, 390-px-Mobilansicht, Navigation, kein globales Überlaufen | Im lokalen Browser geprüft |
 | Light Mode und Dark Mode | Im lokalen Browser geprüft |
-| Discord-Login, OAuth-Rückkehr und verständlicher Abbruch | Im lokalen Browser mit simuliertem Auth-Anbieter geprüft |
+| Ausschließlich Discord als Anmeldeoption, OAuth-Rückkehr und verständlicher Abbruch | Im lokalen Browser mit simuliertem Auth-Anbieter geprüft |
 | Zugangsanfrage, Admin-Freigabe und Zugang im zweiten Browserkontext | Im lokalen Browser mit tatsächlichen PostgreSQL-Funktionen geprüft |
 | Bestätigte Discord-ID statt manipulierbarer Profilmetadaten | Datenbanktests erfolgreich |
 | Alle fünf freigegebenen Discord-IDs direkt als Administrator, wiederholbar ohne doppelte Änderung | Datenbanktests erfolgreich |
@@ -51,8 +51,7 @@ Diese Schritte benötigen die vom Eigentümer anzulegenden Dienste:
 
 - Tatsächlicher Login und Session-Erneuerung an gehostetem Supabase Auth.
 - Discord-Anwendung, Callback-URLs, Provider-Geheimnis, erste Discord-Anmeldung und bestehende Kontoverknüpfung am gehosteten Dienst.
-- E-Mail-Versand, Einladungsannahme und Passwort-Zurücksetzen über den eigenen SMTP-Anbieter.
-- Bereitstellung der Einladungs-Edge-Function einschließlich korrekter `SITE_URL`.
+- Abschaltung des E-Mail-Anbieters im gehosteten Supabase-Dashboard.
 - Gehostete RLS-/RPC-Endpunkte hinter PostgREST mit echten Benutzer-JWTs. Dieselben SQL-Regeln wurden lokal getestet; die externe Konfiguration wurde noch nicht geprüft.
 - Realtime-Verbindung und Aktualisierung zwischen zwei tatsächlichen Geräten.
 - GitHub-Actions-Ausführung im eigenen Repository und tatsächliche GitHub-Pages-Veröffentlichung.
@@ -73,7 +72,7 @@ Auf ausdrücklichen Wunsch sind automatische Backups, verschlüsselte externe Ko
 4. Neue Besprechung anlegen, Thema und Anwesenheit ändern, eine zweite Besprechung erstellen und die getrennten Listen kontrollieren.
 5. Verwarnung mit Ablaufdatum anlegen; Aufhebung und Historie kontrollieren.
 6. Wunsch anlegen, Status ändern und im Audit die Vorher-/Nachher-Werte prüfen.
-7. Leser und Bearbeiter einladen; mit deren eigenen Konten die zulässigen und unzulässigen Aktionen prüfen.
+7. Leser und Bearbeiter nach Discord-Anmeldung freigeben; mit deren eigenen Konten die zulässigen und unzulässigen Aktionen prüfen.
 8. Browser kurz offline schalten, bearbeiten, schließen beziehungsweise neu laden, online gehen und den erhaltenen Entwurf synchronisieren.
 9. Sitzung als PDF speichern und CSV-Export in der verwendeten Tabellenkalkulation öffnen.
 10. Nach GitHub-Deployment dieselben grundlegenden Schritte unter der endgültigen URL wiederholen.

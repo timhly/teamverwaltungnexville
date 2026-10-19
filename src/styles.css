@@ -10,21 +10,7 @@
 .button.discord-button:hover {
   background: #4752c4;
 }
-.auth-divider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: var(--faint);
-  font-size: 10px;
-  margin: 20px 0;
-}
-.auth-divider::before,
-.auth-divider::after {
-  content: "";
-  height: 1px;
-  background: var(--border);
-  flex: 1;
-}
+
 .access-page {
   min-height: 100dvh;
   padding: 36px 20px;

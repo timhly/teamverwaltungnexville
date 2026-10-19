@@ -1,39 +1,14 @@
 import { useState } from "react";
-import {
-  Check,
-  KeyRound,
-  MailPlus,
-  MessageCircle,
-  Shield,
-  UserRound,
-  UserRoundMinus,
-} from "lucide-react";
-import {
-  AutoInput,
-  Avatar,
-  Badge,
-  Button,
-  Dialog,
-  Field,
-} from "../components/ui";
-import { CreateForm, text } from "../components/forms";
+import { MessageCircle, Shield, UserRound, UserRoundMinus } from "lucide-react";
+import { AutoInput, Avatar, Badge, Button, Field } from "../components/ui";
 import { useStore } from "../lib/store";
-import {
-  ACCESS_LABELS,
-  MODULE_LABELS,
-  type AccessRole,
-  type Module,
-} from "../lib/types";
-import { supabase } from "../lib/supabase";
+import { ACCESS_LABELS, MODULE_LABELS, type Module } from "../lib/types";
 import { errorMessage } from "../lib/utils";
 import { connectDiscord } from "../lib/discord";
 import { AccessRequests } from "../components/AccessRequests";
 
 export default function Settings() {
-  const { data, session, can, save, teamId, refresh } = useStore();
-  const [invite, setInvite] = useState(false);
-  const [password, setPassword] = useState(false);
-  const [notice, setNotice] = useState("");
+  const { data, session, can, save } = useStore();
   const [error, setError] = useState("");
   const [discordBusy, setDiscordBusy] = useState(false);
   const admin = can("admin");
@@ -50,12 +25,6 @@ export default function Settings() {
           </p>
         </div>
       </div>
-      {notice && (
-        <div role="status" className="notice notice-success">
-          <Check size={18} />
-          {notice}
-        </div>
-      )}
       {error && (
         <div className="notice notice-error" role="alert">
           {error}
@@ -143,9 +112,6 @@ export default function Settings() {
               Discord verbinden
             </Button>
           )}
-          <Button variant="secondary" onClick={() => setPassword(true)}>
-            <KeyRound size={16} /> Passwort ändern
-          </Button>
           <p className="small muted">
             Die Darstellung kannst du jederzeit über das Sonnensymbol in der
             Kopfzeile wechseln.
@@ -157,15 +123,10 @@ export default function Settings() {
           <div>
             <h2>Zugänge & Berechtigungen</h2>
             <p>
-              Kontorollen regeln den Zugriff auf die Verwaltung. Teamrollen
-              beschreiben Aufgaben im Roleplay-Team.
+              Neue Nutzer melden sich mit Discord an und fragen Zugang an. Hier
+              verwaltest du freigegebene Konten und ihre Rechte.
             </p>
           </div>
-          {admin && (
-            <Button onClick={() => setInvite(true)}>
-              <MailPlus size={17} /> Benutzer einladen
-            </Button>
-          )}
         </div>
         <div className="table-scroll">
           <table>
@@ -266,96 +227,6 @@ export default function Settings() {
           </table>
         </div>
       </section>
-      <Dialog
-        open={invite}
-        onOpenChange={setInvite}
-        title="Zum Teamraum einladen"
-        description="Der neue Benutzer erhält eine persönliche Einladungs-E-Mail."
-      >
-        <CreateForm
-          onCancel={() => setInvite(false)}
-          submitLabel="Einladung versenden"
-          onSubmit={async (f) => {
-            setError("");
-            const { error } = await supabase!.functions.invoke("invite-user", {
-              body: {
-                team_id: teamId,
-                email: text(f, "email"),
-                display_name: text(f, "display_name"),
-                access_role: text(f, "access_role"),
-                redirect_to: location.origin + import.meta.env.BASE_URL,
-              },
-            });
-            if (error)
-              throw new Error(
-                "Einladung fehlgeschlagen. Bitte Edge Function, E-Mail-Versand und Administratorrechte prüfen.",
-              );
-            setInvite(false);
-            setNotice("Einladung versendet. Der Zugriff wurde eingerichtet.");
-            await refresh();
-          }}
-        >
-          <Field label="Anzeigename">
-            <input name="display_name" required maxLength={100} />
-          </Field>
-          <Field label="E-Mail-Adresse">
-            <input name="email" type="email" required maxLength={254} />
-          </Field>
-          <Field label="Zugriffsrolle">
-            <select name="access_role" defaultValue="viewer">
-              {Object.entries(ACCESS_LABELS).map(([k, v]) => (
-                <option key={k} value={k}>
-                  {v}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <div className="notice">
-            Neue Bearbeiter erhalten Zugriff auf Mitglieder, Besprechungen,
-            Verwarnungen und Wünsche. Weitere Rechte lassen sich anschließend
-            gezielt ergänzen.
-          </div>
-        </CreateForm>
-      </Dialog>
-      <Dialog
-        open={password}
-        onOpenChange={setPassword}
-        title="Passwort ändern"
-        description="Verwende mindestens 12 Zeichen und ein einzigartiges Passwort."
-      >
-        <CreateForm
-          onCancel={() => setPassword(false)}
-          submitLabel="Passwort aktualisieren"
-          onSubmit={async (f) => {
-            const p = String(f.get("password") || "");
-            if (p !== String(f.get("confirm") || ""))
-              throw new Error("Die Passwörter stimmen nicht überein.");
-            const { error } = await supabase!.auth.updateUser({ password: p });
-            if (error) throw new Error(errorMessage(error));
-            setPassword(false);
-            setNotice("Dein Passwort wurde aktualisiert.");
-          }}
-        >
-          <Field label="Neues Passwort">
-            <input
-              name="password"
-              type="password"
-              minLength={12}
-              required
-              autoComplete="new-password"
-            />
-          </Field>
-          <Field label="Passwort wiederholen">
-            <input
-              name="confirm"
-              type="password"
-              minLength={12}
-              required
-              autoComplete="new-password"
-            />
-          </Field>
-        </CreateForm>
-      </Dialog>
     </>
   );
 }

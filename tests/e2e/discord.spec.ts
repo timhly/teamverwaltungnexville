@@ -1,17 +1,22 @@
 import { test, expect, type Page } from "@playwright/test";
+import { loginAsDiscord } from "./helpers";
 async function loginAdmin(page: Page) {
-  await page.goto("/");
-  await page
-    .getByLabel("E-Mail-Adresse", { exact: true })
-    .fill("admin@example.test");
-  await page.getByLabel("Passwort", { exact: true }).fill("test-password-123");
-  await page.getByRole("button", { name: "Anmelden", exact: true }).click();
+  await loginAsDiscord(page);
   await expect(
     page.getByRole("heading", { name: "Alles für dein Team." }),
   ).toBeVisible();
 }
 async function loginDiscord(page: Page) {
   await page.goto("/");
+  await expect(
+    page.locator('input[type="email"], input[type="password"]'),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Passwort vergessen?", exact: true }),
+  ).toHaveCount(0);
+  await expect(page.getByText("oder mit E-Mail", { exact: true })).toHaveCount(
+    0,
+  );
   await page
     .getByRole("button", { name: "Mit Discord anmelden", exact: true })
     .click();
@@ -102,9 +107,7 @@ test("administrator grants a Discord account admin rights, confirmed user can en
       pending.getByRole("heading", { name: "Alles für dein Team." }),
     ).toBeVisible();
     await pending.goto("/#/einstellungen");
-    await expect(
-      pending.getByRole("button", { name: "Benutzer einladen", exact: true }),
-    ).toBeVisible();
+    await expect(pending.locator(".access-requests-panel")).toBeVisible();
     await expect(pending.locator(".discord-account")).toContainText(
       "123456789012345678",
     );
@@ -128,24 +131,18 @@ test("Discord cancellation returns a German error with an available retry button
 test("an account with an allowlisted verified Discord identity receives admin access without a request", async ({
   page,
 }) => {
-  await page.goto("/");
-  await page
-    .getByLabel("E-Mail-Adresse", { exact: true })
-    .fill("discord-admin@example.test");
-  await page.getByLabel("Passwort", { exact: true }).fill("test-password-123");
-  await page.getByRole("button", { name: "Anmelden", exact: true }).click();
+  await loginAsDiscord(page, "discord-admin@example.test");
   await expect(
     page.getByRole("heading", { name: "Alles für dein Team." }),
   ).toBeVisible();
   await page.goto("/#/einstellungen");
+  await expect(page.locator(".access-requests-panel")).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Benutzer einladen", exact: true }),
-  ).toBeVisible();
+    page.getByRole("button", { name: "Passwort ändern", exact: true }),
+  ).toHaveCount(0);
   await expect(page.locator(".discord-account")).toContainText(
     "470653391094415362",
   );
   await page.reload();
-  await expect(
-    page.getByRole("button", { name: "Benutzer einladen", exact: true }),
-  ).toBeVisible();
+  await expect(page.locator(".access-requests-panel")).toBeVisible();
 });
