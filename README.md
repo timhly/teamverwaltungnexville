@@ -136,7 +136,7 @@ Das ist eine Datenbank-Administratoraktion. Die Funktion prüft, dass Empfänger
 
 ### Render (aktuell gewähltes Hosting)
 
-Das Repository ist `https://github.com/timhly/teamverwaltungnexville`. Auf Render **New → Static Site** wählen und dieses Repository verbinden. Es ist kein dauerhaft laufender Web Service erforderlich.
+Das Repository ist `https://github.com/timhly/teamverwaltungnexville`. Für den bereits ausgewählten **Web Service** diese Einstellungen verwenden. Der mitgelieferte Produktionsserver liefert den gebauten Frontend-Ordner aus; Datenbank und Anmeldung bleiben bei Supabase.
 
 | Feld | Eintrag |
 |---|---|
@@ -144,8 +144,9 @@ Das Repository ist `https://github.com/timhly/teamverwaltungnexville`. Auf Rende
 | Branch | `main` |
 | Root Directory | leer lassen |
 | Build Command | `npm ci && npm run build` |
-| Publish Directory | `dist` |
-| Start Command | entfällt bei Static Sites |
+| Language / Runtime | `Node` |
+| Start Command | `npm start` |
+| Health Check Path | `/` |
 
 Environment Variables:
 
@@ -157,7 +158,9 @@ Environment Variables:
 | `VITE_SUPABASE_URL` | die eigene Supabase-Projekt-URL |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | der öffentliche Publishable Key oder Legacy-Anon-Key |
 
-Alternativ kann Render die Einstellungen aus `render.yaml` über **New → Blueprint** übernehmen. Projekt-URL und öffentlichen Key dabei selbst eintragen. Ohne Supabase-Verbindung ist nur die Einrichtungsansicht nutzbar. Geheime Service-Role-Keys gehören nicht in das Frontend.
+Alternativ kann Render die Einstellungen aus `render.yaml` über **New → Blueprint** übernehmen. Der Server bindet an `0.0.0.0` und verwendet automatisch den von Render vorgegebenen `PORT`. Projekt-URL und öffentlichen Key dabei selbst eintragen. Ohne Supabase-Verbindung ist nur die Einrichtungsansicht nutzbar. Geheime Service-Role-Keys gehören nicht in das Frontend.
+
+Auch eine **Static Site** ist weiterhin möglich: gleicher Build Command, Publish Directory `dist`, kein Start Command. Die `render.yaml` ist jetzt auf den gewünschten Web Service eingestellt. Der kostenlose Web-Service-Tarif kann bei Inaktivität herunterfahren; für dauerhaft laufenden Betrieb einen passenden Tarif wählen.
 
 Bei Änderungen an den `VITE_`-Werten neu deployen, damit sie in den Build übernommen werden. Die endgültige Render-Adresse mit abschließendem `/` in Supabase als Site URL und erlaubte Redirect URL sowie beim Einladungsdienst als `SITE_URL` hinterlegen. Das Hash-Routing benötigt keine Rewrite-Regel.
 

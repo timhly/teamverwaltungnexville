@@ -1,11 +1,13 @@
 services:
   - type: web
     name: teamverwaltungnexville
-    runtime: static
+    runtime: node
+    plan: free
     repo: https://github.com/timhly/teamverwaltungnexville
     branch: main
     buildCommand: npm ci && npm run build
-    staticPublishPath: ./dist
+    startCommand: npm start
+    healthCheckPath: /
     envVars:
       - key: NODE_VERSION
         value: "24"
