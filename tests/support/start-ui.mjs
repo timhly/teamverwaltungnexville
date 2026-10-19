@@ -3,13 +3,39 @@
 // Authentication responses exercise UI behavior; they do NOT verify hosted Supabase Auth.
 import http from "node:http";
 import { createServer as viteServer } from "vite";
-import { database, asUser, ADMIN, VIEWER, EDITOR } from "../db-helper.ts";
+import {
+  database,
+  asUser,
+  ADMIN,
+  VIEWER,
+  EDITOR,
+  OUTSIDER,
+} from "../db-helper.ts";
 
-let { db, team } = await database();
+const DISCORD_ADMIN = "10000000-0000-4000-8000-000000000005";
+async function fixture() {
+  const result = await database();
+  await result.db.query(
+    `insert into auth.identities(user_id,provider,provider_id,identity_data) values($1,'discord','123456789012345678','{"full_name":"Discord Fixture"}')`,
+    [OUTSIDER],
+  );
+  await result.db.query(
+    "insert into auth.users(id,email) values($1,'discord-admin@example.test')",
+    [DISCORD_ADMIN],
+  );
+  await result.db.query(
+    "insert into auth.identities(user_id,provider,provider_id,identity_data) values($1,'discord','470653391094415362','{\"full_name\":\"Discord Admin Fixture\"}')",
+    [DISCORD_ADMIN],
+  );
+  return result;
+}
+let { db, team } = await fixture();
 const identities = {
   "admin@example.test": ADMIN,
   "viewer@example.test": VIEWER,
   "editor@example.test": EDITOR,
+  "discord@example.test": OUTSIDER,
+  "discord-admin@example.test": DISCORD_ADMIN,
 };
 const jwt = (id) =>
   [
@@ -32,7 +58,10 @@ const user = (id, email) => ({
   aud: "authenticated",
   role: "authenticated",
   email_confirmed_at: new Date().toISOString(),
-  app_metadata: { provider: "email", providers: ["email"] },
+  app_metadata: {
+    provider: id === OUTSIDER ? "discord" : "email",
+    providers: [id === OUTSIDER ? "discord" : "email"],
+  },
   user_metadata: {},
   created_at: new Date().toISOString(),
 });
@@ -84,8 +113,28 @@ const api = http.createServer((req, res) => {
         }
         if (url.pathname === "/__test/reset") {
           await db.close();
-          ({ db, team } = await database());
+          ({ db, team } = await fixture());
           send({ ok: true });
+          return;
+        }
+        if (url.pathname === "/auth/v1/authorize") {
+          if (url.searchParams.get("provider") !== "discord") {
+            send({ message: "Unsupported test provider" }, 400);
+            return;
+          }
+          const target = new URL(url.searchParams.get("redirect_to"));
+          if (target.origin !== "http://127.0.0.1:5174") {
+            send({ message: "Unexpected test redirect" }, 400);
+            return;
+          }
+          target.hash = new URLSearchParams({
+            access_token: jwt(OUTSIDER),
+            refresh_token: `fixture-refresh-${OUTSIDER}`,
+            expires_in: "3600",
+            token_type: "bearer",
+          }).toString();
+          res.writeHead(302, { ...headers, Location: target.toString() });
+          res.end();
           return;
         }
         if (url.pathname === "/auth/v1/token") {
@@ -135,6 +184,32 @@ const api = http.createServer((req, res) => {
           send({});
           return;
         }
+        const extraRpcs = {
+          "/rest/v1/rpc/sync_discord_profile": [
+            "select public.sync_discord_profile() result",
+            [],
+          ],
+          "/rest/v1/rpc/request_team_access": [
+            "select public.request_team_access($1::uuid) result",
+            [body.p_team || null],
+          ],
+          "/rest/v1/rpc/review_access_request": [
+            "select public.review_access_request($1::uuid,$2::uuid,$3::int,$4,$5) result",
+            [
+              body.p_team,
+              body.p_request,
+              body.p_expected,
+              body.p_decision,
+              body.p_role,
+            ],
+          ],
+        };
+        if (extraRpcs[url.pathname]) {
+          const [sql, args] = extraRpcs[url.pathname];
+          const result = await asUser(db, identity, () => db.query(sql, args));
+          send(result.rows[0].result);
+          return;
+        }
         if (url.pathname === "/rest/v1/rpc/mutate") {
           const result = await asUser(db, identity, () =>
             db.query(
@@ -174,6 +249,7 @@ const api = http.createServer((req, res) => {
           "warning_status",
           "team_wishes",
           "audit_logs",
+          "access_requests",
         ];
         if (!tables.includes(table) || req.method !== "GET") {
           send({ message: "Not found" }, 404);

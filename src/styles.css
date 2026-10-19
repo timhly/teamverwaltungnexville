@@ -1,5 +1,111 @@
 @import "tailwindcss";
 
+.button.discord-button {
+  width: 100%;
+  background: #5865f2;
+  color: #fff;
+  border-color: #6975ff;
+  min-height: 44px;
+}
+.button.discord-button:hover {
+  background: #4752c4;
+}
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--faint);
+  font-size: 10px;
+  margin: 20px 0;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  height: 1px;
+  background: var(--border);
+  flex: 1;
+}
+.access-page {
+  min-height: 100dvh;
+  padding: 36px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+}
+.access-panel {
+  max-width: 560px;
+  width: 100%;
+  padding: 30px;
+}
+.access-panel h1 {
+  font-size: 26px;
+}
+.access-panel > p {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 14px 0 24px;
+}
+.access-panel .detail-identity {
+  margin-bottom: 24px;
+}
+.access-panel > small {
+  display: block;
+  font-size: 10px;
+  color: var(--faint);
+  line-height: 1.8;
+  margin-top: 22px;
+}
+.access-panel .notice {
+  font-size: 11px;
+}
+.access-requests-panel {
+  margin-bottom: 24px;
+}
+.access-requests-panel h2 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.access-requests-panel .notice {
+  margin: 0 20px 16px;
+}
+.requests-empty {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 22px 25px;
+  color: var(--muted);
+}
+.requests-empty p {
+  font-size: 11px;
+}
+.requests-empty svg {
+  flex-shrink: 0;
+  color: var(--teal);
+}
+.account-id {
+  display: block;
+  font-size: 9px;
+  color: var(--muted);
+  font-weight: 400;
+  margin-top: 5px;
+}
+.discord-account {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+}
+.discord-account strong {
+  font-size: 12px;
+}
+.discord-account small {
+  color: var(--muted);
+  font-size: 10px;
+}
+
 :root {
   font-family: "Manrope", sans-serif;
   color-scheme: dark;

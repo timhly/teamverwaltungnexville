@@ -1,5 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
 
+const authHash = new URLSearchParams(
+  location.hash.startsWith("#/") ? "" : location.hash.slice(1),
+);
+export const oauthCallbackError = authHash.has("error")
+  ? "Die Discord-Anmeldung wurde abgebrochen oder konnte nicht abgeschlossen werden. Bitte erneut versuchen."
+  : "";
+if (oauthCallbackError)
+  history.replaceState(null, "", location.pathname + location.search + "#/");
+
 if (/(?:type=invite|type=recovery)/.test(location.hash))
   sessionStorage.setItem("nexville:set-password", "true");
 

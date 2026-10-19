@@ -41,6 +41,7 @@ interface Store {
   ) => Promise<void>;
   create: (table: Table, patch: Record<string, unknown>) => Promise<string>;
   refresh: () => Promise<void>;
+  reloadAccess: () => void;
   selectTeam: (id: string) => void;
 }
 const Context = createContext<Store | null>(null);
@@ -156,6 +157,8 @@ export function StoreProvider({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [revision, setRevision] = useState(0);
+  const [accessRevision, setAccessRevision] = useState(0);
+  const reloadAccess = useCallback(() => setAccessRevision((v) => v + 1), []);
   const [queue, setQueue] = useState<SyncQueue | null>(null);
   const fetchSequence = useRef(0);
   const refresh = useCallback(async () => {
@@ -174,38 +177,53 @@ export function StoreProvider({
   }, [session.user.id, teamId]);
   useEffect(() => {
     let disposed = false;
-    void supabase!
-      .from("user_permissions")
-      .select("*")
-      .eq("user_id", session.user.id)
-      .then(({ data, error }) => {
-        if (disposed) return;
-        const selected = localStorage.getItem(
-          `nexville:team:${session.user.id}`,
-        );
-        if (error) {
-          setError(errorMessage(error));
-          if (selected) setTeamId(selected);
-          else setLoading(false);
-          return;
-        }
-        const id =
-          data?.find((x) => x.team_id === selected)?.team_id ||
-          data?.[0]?.team_id;
-        if (id) {
-          localStorage.setItem(`nexville:team:${session.user.id}`, id);
-          setTeamId(id);
-        } else {
-          setLoading(false);
-          setError(
-            "Für dein Konto wurde noch kein Teamzugriff eingerichtet. Bitte den Administrator kontaktieren.",
+    void (async () => {
+      const { data: profile, error: profileError } = await supabase!.rpc(
+        "sync_discord_profile",
+      );
+      if (disposed) return;
+      if (profileError) {
+        setError(errorMessage(profileError));
+        setLoading(false);
+        return;
+      }
+      setBase((current) => ({ ...current, profiles: [profile] }));
+      await supabase!
+        .from("user_permissions")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .then(({ data, error }) => {
+          if (disposed) return;
+          const selected = localStorage.getItem(
+            `nexville:team:${session.user.id}`,
           );
-        }
-      });
+          if (error) {
+            setError(errorMessage(error));
+            if (selected) setTeamId(selected);
+            else setLoading(false);
+            return;
+          }
+          const id =
+            data?.find((x) => x.team_id === selected)?.team_id ||
+            data?.[0]?.team_id;
+          if (id) {
+            localStorage.setItem(`nexville:team:${session.user.id}`, id);
+            setTeamId(id);
+          } else {
+            setLoading(false);
+            setError("");
+          }
+        });
+    })().catch((e) => {
+      if (!disposed) {
+        setError(errorMessage(e));
+        setLoading(false);
+      }
+    });
     return () => {
       disposed = true;
     };
-  }, [session.user.id]);
+  }, [session.user.id, accessRevision]);
   useEffect(() => {
     if (!teamId) return;
     let disposed = false;
@@ -270,6 +288,22 @@ export function StoreProvider({
           timer = setTimeout(() => {
             void refresh().catch((e) => setError(errorMessage(e)));
           }, 300);
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "access_requests",
+          filter: `team_id=eq.${teamId}`,
+        },
+        () => {
+          clearTimeout(timer);
+          timer = setTimeout(
+            () => void refresh().catch((e) => setError(errorMessage(e))),
+            300,
+          );
         },
       )
       .subscribe();
@@ -368,6 +402,7 @@ export function StoreProvider({
         save,
         create,
         refresh,
+        reloadAccess,
         selectTeam: (id) => {
           if (queue?.items.length)
             throw new Error(

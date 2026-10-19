@@ -18,6 +18,17 @@ export interface Team {
 export interface Profile {
   id: string;
   display_name: string;
+  discord_id: string | null;
+  discord_name: string | null;
+}
+export interface AccessRequest extends Entity {
+  user_id: string;
+  discord_id: string;
+  discord_name: string;
+  status: "pending" | "approved" | "rejected";
+  access_role: AccessRole | null;
+  decided_by: string | null;
+  decided_at: string | null;
 }
 export interface Permission extends Entity {
   user_id: string;
@@ -115,6 +126,7 @@ export interface Data {
   warning_status: Warning[];
   team_wishes: Wish[];
   audit_logs: Audit[];
+  access_requests: AccessRequest[];
 }
 export type Table =
   | "teams"
@@ -147,6 +159,7 @@ export const EMPTY_DATA: Data = {
   warning_status: [],
   team_wishes: [],
   audit_logs: [],
+  access_requests: [],
 };
 export const WISH_LABELS: Record<WishStatus, string> = {
   open: "Offen",

@@ -1,11 +1,12 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { Route, Routes } from "react-router-dom";
-import { supabase } from "./lib/supabase";
+import { oauthCallbackError, supabase } from "./lib/supabase";
 import { StoreProvider, useStore } from "./lib/store";
 import { Auth } from "./pages/Auth";
 import { Shell } from "./components/Shell";
 import { Empty, Loading } from "./components/ui";
+import { AccessPending } from "./pages/AccessPending";
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Members = lazy(() => import("./pages/Members"));
 const Roles = lazy(() => import("./pages/Roles"));
@@ -17,6 +18,7 @@ const Settings = lazy(() => import("./pages/Settings"));
 
 function Workspace() {
   const { loading, teamId } = useStore();
+  if (!loading && !teamId) return <AccessPending />;
   return (
     <Shell>
       {loading ? (
@@ -75,7 +77,7 @@ export function App() {
   const [password, setPassword] = useState(
     () => sessionStorage.getItem("nexville:set-password") === "true",
   );
-  const [authError, setAuthError] = useState("");
+  const [authError, setAuthError] = useState(oauthCallbackError);
   useEffect(() => {
     if (!supabase) return;
     let mounted = true;
@@ -106,15 +108,7 @@ export function App() {
     };
   }, []);
   if (loading) return <Loading>Dein Teamraum wird geöffnet …</Loading>;
-  if (authError && !session)
-    return (
-      <>
-        <div role="alert" className="notice notice-error">
-          {authError}
-        </div>
-        <Auth />
-      </>
-    );
+  if (authError && !session) return <Auth initialError={authError} />;
   if (!session) return <Auth />;
   if (password)
     return (

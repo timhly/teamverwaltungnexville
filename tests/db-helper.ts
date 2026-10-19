@@ -8,6 +8,7 @@ export async function database() {
   const db = new PGlite();
   await db.exec(`create role anon;create role authenticated;create role service_role bypassrls;create schema auth;
     create table auth.users(id uuid primary key,email text,raw_user_meta_data jsonb default '{}'::jsonb);
+    create table auth.identities(id uuid primary key default gen_random_uuid(),user_id uuid not null references auth.users(id),provider text not null,provider_id text not null,identity_data jsonb default '{}'::jsonb,unique(provider,provider_id));
     create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
     grant usage on schema auth to anon,authenticated,service_role;grant execute on function auth.uid() to anon,authenticated,service_role;
     insert into auth.users(id,email) values ('${ADMIN}','admin@example.test'),('${EDITOR}','editor@example.test'),('${VIEWER}','viewer@example.test'),('${OUTSIDER}','outsider@example.test');`);
@@ -16,6 +17,8 @@ export async function database() {
     "202610190002_seed.sql",
     "202610190003_access_and_copy.sql",
     "202610190004_rank_order.sql",
+    "202610190005_discord_access.sql",
+    "202610190006_discord_admins.sql",
   ])
     await db.exec(
       await readFile(

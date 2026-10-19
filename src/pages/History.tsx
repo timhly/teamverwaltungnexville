@@ -20,6 +20,7 @@ import { supabase } from "../lib/supabase";
 import type { Audit } from "../lib/types";
 import { date, downloadCSV, errorMessage, relativeTime } from "../lib/utils";
 const ENTITY_LABELS: Record<string, string> = {
+  access_requests: "Zugangsanfrage",
   teams: "Teameinstellungen",
   team_members: "Mitglied",
   roles: "Rolle",

@@ -1,6 +1,6 @@
 # Abnahmeprotokoll · Nexville Roleplay
 
-Stand: 19.10.2026. Produktive Konten und Dienste wurden noch nicht eingerichtet. Die lokalen Ergebnisse beziehen sich auf den ausgelieferten Code und die PostgreSQL-Testumgebung.
+Stand: 19.10.2026. Die produktive Konfiguration wurde nicht geprüft. Die lokalen Ergebnisse beziehen sich auf den ausgelieferten Code und die PostgreSQL-Testumgebung.
 
 ## Lokal überprüft
 
@@ -36,19 +36,27 @@ Stand: 19.10.2026. Produktive Konten und Dienste wurden noch nicht eingerichtet.
 | Netzwerkabbruch, erhaltene Outbox, erfolgreiche spätere Synchronisierung | Im lokalen Browser geprüft |
 | Desktop, 390-px-Mobilansicht, Navigation, kein globales Überlaufen | Im lokalen Browser geprüft |
 | Light Mode und Dark Mode | Im lokalen Browser geprüft |
+| Discord-Login, OAuth-Rückkehr und verständlicher Abbruch | Im lokalen Browser mit simuliertem Auth-Anbieter geprüft |
+| Zugangsanfrage, Admin-Freigabe und Zugang im zweiten Browserkontext | Im lokalen Browser mit tatsächlichen PostgreSQL-Funktionen geprüft |
+| Bestätigte Discord-ID statt manipulierbarer Profilmetadaten | Datenbanktests erfolgreich |
+| Alle fünf freigegebenen Discord-IDs direkt als Administrator, wiederholbar ohne doppelte Änderung | Datenbanktests erfolgreich |
+| Automatische Administratorfreigabe im Browser, nach Neuladen erhalten | Mit verknüpfter Discord-Testidentität geprüft |
+| Keine Freigabe durch fremde Provider, eigene Rechtevergabe oder bearbeitbare Metadaten | Datenbanktests erfolgreich |
 
-Reproduzieren mit `npm test`, `npm run test:e2e` und `npm run build`. Erfolgreich ausgeführt wurden 32 Unit-/Datenbanktests und neun Browsertests, einschließlich sofortigem Neuladen vor Ablauf der Speicherpause und einem konkurrierenden Serverwrite. Der Browserbericht dokumentiert die Szenarien und ihre Screenshots. Diese Tests ersetzen keine Prüfung am echten Supabase-Projekt.
+Reproduzieren mit `npm test`, `npm run test:e2e` und `npm run build`. Die Suite umfasst 51 Unit-/Datenbanktests und 13 Browsertests, einschließlich sofortigem Neuladen vor Ablauf der Speicherpause und einem konkurrierenden Serverwrite. Der Browserbericht dokumentiert die Szenarien und ihre Screenshots. Auth-Antworten und Discord-Weiterleitungen sind lokale Test-Fixtures; diese Tests ersetzen keine Prüfung an Discord und dem echten Supabase-Projekt.
 
 ## Noch nicht verifiziert
 
 Diese Schritte benötigen die vom Eigentümer anzulegenden Dienste:
 
 - Tatsächlicher Login und Session-Erneuerung an gehostetem Supabase Auth.
+- Discord-Anwendung, Callback-URLs, Provider-Geheimnis, erste Discord-Anmeldung und bestehende Kontoverknüpfung am gehosteten Dienst.
 - E-Mail-Versand, Einladungsannahme und Passwort-Zurücksetzen über den eigenen SMTP-Anbieter.
 - Bereitstellung der Einladungs-Edge-Function einschließlich korrekter `SITE_URL`.
 - Gehostete RLS-/RPC-Endpunkte hinter PostgREST mit echten Benutzer-JWTs. Dieselben SQL-Regeln wurden lokal getestet; die externe Konfiguration wurde noch nicht geprüft.
 - Realtime-Verbindung und Aktualisierung zwischen zwei tatsächlichen Geräten.
 - GitHub-Actions-Ausführung im eigenen Repository und tatsächliche GitHub-Pages-Veröffentlichung.
+- Render-Deployment unter der endgültigen Domain.
 - Richtiger Basispfad, Auth-Redirect und Bannerabruf unter der endgültigen Domain.
 - Tatsächlicher PDF-Druckdialog und Ergebnis im Zielbrowser.
 - Lastprüfung mit sehr großen Datenmengen und Langzeitbetrieb.
@@ -69,3 +77,4 @@ Auf ausdrücklichen Wunsch sind automatische Backups, verschlüsselte externe Ko
 8. Browser kurz offline schalten, bearbeiten, schließen beziehungsweise neu laden, online gehen und den erhaltenen Entwurf synchronisieren.
 9. Sitzung als PDF speichern und CSV-Export in der verwendeten Tabellenkalkulation öffnen.
 10. Nach GitHub-Deployment dieselben grundlegenden Schritte unter der endgültigen URL wiederholen.
+11. Mit einer der fünf freigegebenen Discord-IDs anmelden und direkten Administratorzugriff prüfen. Mit einem anderen Discord-Konto Zugang anfragen, als Leser freigeben und die Rechte prüfen.

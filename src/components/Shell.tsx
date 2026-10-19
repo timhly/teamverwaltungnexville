@@ -178,6 +178,16 @@ export function Shell({ children }: { children: ReactNode }) {
             <n.icon size={18} />
             <span>{n.label}</span>
             {n.to === "/backups" && <span className="nav-small">Pausiert</span>}
+            {n.to === "/einstellungen" &&
+              permission?.access_role === "admin" &&
+              data.access_requests.some((r) => r.status === "pending") && (
+                <span className="nav-count" aria-label="Offene Zugangsanfragen">
+                  {
+                    data.access_requests.filter((r) => r.status === "pending")
+                      .length
+                  }
+                </span>
+              )}
           </NavLink>
         ))}
       </nav>

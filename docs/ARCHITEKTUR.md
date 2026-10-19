@@ -4,7 +4,8 @@
 
 ```mermaid
 flowchart LR
-  UI[React / GitHub Pages] -->|Sitzung| Auth[Supabase Auth]
+  UI[React / Render] -->|Sitzung| Auth[Supabase Auth]
+  Discord[Discord OAuth] --> Auth
   UI --> Draft[Lokale Textentwürfe]
   Draft --> Queue[Persistente IndexedDB-Outbox]
   Queue -->|UUID + erwartete Version| RPC[PostgreSQL mutate]
@@ -22,6 +23,10 @@ flowchart LR
 ## Tabellen
 
 `teams` umfasst den Workspace. `profiles` gehört zu Supabase-Auth-Konten; `user_permissions` verbindet Konten und Teams samt Modulen. `team_members` beschreibt Roleplay-Teammitglieder und benötigt keinen eigenen Login. `roles` und `member_roles` bilden Mehrfachzuweisungen ab. Ränge, Zusatzrollen und erhaltene Sonderrollen sind getrennte Rollenkategorien.
+
+`access_requests` speichert Zugangsanfragen mit bestätigter Discord-ID, Status und Entscheidung. Anfragende sehen nur ihre eigene Anfrage; nur Teamadministratoren sehen andere Anfragen. Die RPC `review_access_request` prüft Administratorrecht, Version und die weiterhin bestehende Discord-Identität. Rechte und Entscheidung werden atomar gespeichert. Bestehende Rechte werden durch eine Anfrage nicht überschrieben.
+
+`sync_discord_profile` übernimmt die ID aus `auth.identities` und erhält bestehende Anzeigenamen. Ein Trigger prüft die nur für den Datenbankeigentümer bearbeitbare `discord_admin_allowlist`. Die fünf ausdrücklich vorgegebenen IDs erhalten ausschließlich im eindeutig benannten Team „Nexville Roleplay“ Administratorrechte. Wiederholte Anmeldungen erzeugen keine erneuten Rechteänderungen, solange das Recht bereits besteht. Andere Teams erhalten dadurch keinen zusätzlichen Administrator. Die Migration berücksichtigt auch bereits vorhandene bestätigte Discord-Identitäten.
 
 `meetings`, `meeting_topics` und `meeting_attendance` sind eigenständige Datensätze je Sitzung. Ein Unique-Constraint verhindert doppelte Anwesenheit desselben Mitglieds in einer Sitzung. Name und Rollen werden bei Erstellung als Snapshot erfasst. Archivierte Mitglieder bleiben referenzierbar.
 

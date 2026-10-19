@@ -6,12 +6,14 @@ import {
   KeyRound,
   LoaderCircle,
   LockKeyhole,
+  MessageCircle,
   ShieldCheck,
   Users,
 } from "lucide-react";
 import { configured, supabase } from "../lib/supabase";
 import { Button, Field } from "../components/ui";
 import { errorMessage } from "../lib/utils";
+import { connectDiscord } from "../lib/discord";
 
 export function Brand() {
   return (
@@ -27,12 +29,14 @@ export function Brand() {
 export function Auth({
   setPassword = false,
   onPasswordSet,
+  initialError = "",
 }: {
   setPassword?: boolean;
   onPasswordSet?: () => void;
+  initialError?: string;
 }) {
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(initialError);
   const [message, setMessage] = useState("");
   const [reset, setReset] = useState(false);
   const submit = async (e: FormEvent<HTMLFormElement>) => {
@@ -180,6 +184,35 @@ export function Auth({
                     ? "Wir senden dir einen sicheren Link per E-Mail."
                     : "Melde dich an, um deinen Teamraum zu öffnen."}
               </p>
+              {error && (
+                <div className="notice notice-error" role="alert">
+                  {error}
+                </div>
+              )}
+              {!setPassword && !reset && (
+                <>
+                  <Button
+                    className="discord-button"
+                    disabled={busy}
+                    onClick={async () => {
+                      setBusy(true);
+                      setError("");
+                      sessionStorage.removeItem("nexville:set-password");
+                      try {
+                        await connectDiscord();
+                      } catch (e) {
+                        setError(errorMessage(e));
+                        setBusy(false);
+                      }
+                    }}
+                  >
+                    <MessageCircle size={19} /> Mit Discord anmelden
+                  </Button>
+                  <div className="auth-divider">
+                    <span>oder mit E-Mail</span>
+                  </div>
+                </>
+              )}
               <form className="form-stack" onSubmit={submit}>
                 {!setPassword && (
                   <Field label="E-Mail-Adresse">
@@ -219,11 +252,6 @@ export function Auth({
                     />
                   </Field>
                 )}
-                {error && (
-                  <div className="notice notice-error" role="alert">
-                    {error}
-                  </div>
-                )}
                 {message && (
                   <div className="notice notice-success" role="status">
                     <Check size={18} />
@@ -258,7 +286,7 @@ export function Auth({
                 )}
               </form>
               <div className="auth-bottom">
-                <ShieldCheck size={15} /> Zugang nur mit persönlicher Einladung.
+                <ShieldCheck size={15} /> Teamzugriff für freigegebene Konten.
               </div>
             </>
           )}

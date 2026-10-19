@@ -3,6 +3,7 @@ import {
   Check,
   KeyRound,
   MailPlus,
+  MessageCircle,
   Shield,
   UserRound,
   UserRoundMinus,
@@ -25,6 +26,8 @@ import {
 } from "../lib/types";
 import { supabase } from "../lib/supabase";
 import { errorMessage } from "../lib/utils";
+import { connectDiscord } from "../lib/discord";
+import { AccessRequests } from "../components/AccessRequests";
 
 export default function Settings() {
   const { data, session, can, save, teamId, refresh } = useStore();
@@ -32,6 +35,7 @@ export default function Settings() {
   const [password, setPassword] = useState(false);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
+  const [discordBusy, setDiscordBusy] = useState(false);
   const admin = can("admin");
   const team = data.teams[0];
   const profile = data.profiles.find((p) => p.id === session.user.id);
@@ -57,6 +61,7 @@ export default function Settings() {
           {error}
         </div>
       )}
+      <AccessRequests />
       <div className="settings-layout">
         <section className="panel settings-panel">
           <div className="panel-heading">
@@ -108,6 +113,36 @@ export default function Settings() {
               <span>{session.user.email}</span>
             </div>
           </div>
+          {profile?.discord_id ? (
+            <div className="discord-account">
+              <Badge tone="teal">
+                <MessageCircle size={14} />
+                Discord verbunden
+              </Badge>
+              <strong>{profile.discord_name}</strong>
+              <small>Discord-ID: {profile.discord_id}</small>
+            </div>
+          ) : (
+            <Button
+              className="discord-button"
+              disabled={discordBusy}
+              onClick={async () => {
+                setError("");
+                setDiscordBusy(true);
+                try {
+                  await connectDiscord(true);
+                } catch (e) {
+                  setError(
+                    `Discord konnte nicht verbunden werden. Bitte den Discord-Anbieter und die manuelle Kontoverknüpfung in Supabase prüfen. ${errorMessage(e)}`,
+                  );
+                  setDiscordBusy(false);
+                }
+              }}
+            >
+              <MessageCircle size={17} />
+              Discord verbinden
+            </Button>
+          )}
           <Button variant="secondary" onClick={() => setPassword(true)}>
             <KeyRound size={16} /> Passwort ändern
           </Button>
@@ -150,7 +185,14 @@ export default function Settings() {
                     <td>
                       <div className="member-name">
                         <Avatar name={u?.display_name || "Benutzer"} />
-                        <strong>{u?.display_name || "Benutzer"}</strong>
+                        <div>
+                          <strong>{u?.display_name || "Benutzer"}</strong>
+                          {u?.discord_id && (
+                            <small className="account-id">
+                              Discord: {u.discord_name} · {u.discord_id}
+                            </small>
+                          )}
+                        </div>
                         {p.user_id === session.user.id && <Badge>Du</Badge>}
                       </div>
                     </td>

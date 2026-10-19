@@ -2,7 +2,9 @@
 
 Eine deutschsprachige Teamverwaltung mit React, TypeScript, Vite, Tailwind CSS, Radix-Dialogen im shadcn-Stil, Lucide und Supabase PostgreSQL/Auth. Das mitgelieferte Nexville-Banner wird unverändert verwendet. Schriftdateien liegen im Build; Google Fonts wird nicht angefragt.
 
-**Aktueller Stand:** Der vollständige Anwendungscode, Datenbankmigrationen, Einladungscode, Tests und GitHub-Pages-Workflows liegen vor. Ein Supabase-Projekt und ein GitHub-Repository wurden noch nicht erstellt. Ohne Verbindung zeigt die Anwendung eine Einrichtungsansicht, keine erfundenen Teamdaten. Der produktive Betrieb ist **noch nicht verifiziert**.
+**Aktueller Stand:** Anwendungscode, Datenbankmigrationen, Discord-Anmeldung, Einladungscode und Tests liegen im [GitHub-Repository](https://github.com/timhly/teamverwaltungnexville). Render ist als Web Service vorbereitet. Die gehostete Supabase-/Discord-Konfiguration und der produktive Betrieb sind **noch nicht verifiziert**. Ohne Verbindung zeigt die Anwendung eine Einrichtungsansicht, keine erfundenen Teamdaten.
+
+**Discord einrichten:** Die vollständige Anleitung einschließlich der fünf direkt freigegebenen Administrator-IDs steht in [docs/DISCORD.md](docs/DISCORD.md).
 
 **Backups wurden auf ausdrücklichen Wunsch vorerst zurückgestellt.** Es gibt keinen automatischen Backup-Auftrag, keine externe Sicherung und keine PC-Synchronisierung. Der Menüpunkt erklärt diesen Zustand. CSV-Exporte und lokale Entwürfe sind kein vollständiges Datenbankbackup.
 
@@ -23,6 +25,7 @@ Ansichten aus der lokalen Prüfung: [Desktop](docs/preview/desktop.png), [Smartp
 - Teamwünsche mit Beschreibung, Einreicher, Priorität, Status, Notizen, Archivierung und berechtigter Löschung.
 - Automatisches Speichern, dauerhafte lokale Warteschlange, sofort gesicherte Textentwürfe, Wiederholung vorübergehender Fehler, Versionsprüfung und verständliche Konfliktauflösung.
 - Login, Passwort-Zurücksetzen, Einladungsannahme, Passwortänderung, Administrator/Bearbeiter/Leser und gezielte Bearbeiterrechte pro Modul.
+- Discord-Anmeldung, Verknüpfung bestehender Konten und Zugangsanfragen mit bestätigter Discord-ID. Administratoren können Anfragen als Leser, Bearbeiter oder Administrator freigeben. Fünf ausdrücklich hinterlegte Discord-IDs erhalten im Nexville-Team direkt Administratorrechte.
 - Unveränderbares serverseitiges Audit-Log mit Vorher-/Nachher-Werten. Die Gesamtansicht lädt ältere Ereignisse seitenweise nach.
 - Globale Suche mit Strg+K, CSV-Export, Dark/Light Mode und mobile Navigation.
 
@@ -50,9 +53,11 @@ Bis die nächsten Schritte erledigt sind, siehst du die Einrichtungsansicht. Es 
    2. `supabase/migrations/202610190002_seed.sql`
    3. `supabase/migrations/202610190003_access_and_copy.sql`
    4. `supabase/migrations/202610190004_rank_order.sql`
+   5. `supabase/migrations/202610190005_discord_access.sql`
+   6. `supabase/migrations/202610190006_discord_admins.sql`
 
-4. Unter **Authentication → Providers / Sign In** den E-Mail-Anbieter aktivieren und öffentliche Neuregistrierungen deaktivieren. Die entsprechende Einstellung heißt je nach Dashboard-Version „Allow new users to sign up“. Die lokale Supabase-Konfiguration deaktiviert Registrierungen bereits; das gehostete Projekt muss separat eingestellt werden.
-5. Unter **Authentication → URL Configuration** als Site URL zunächst deine Entwicklungsadresse setzen. Die Entwicklungsadresse und später die vollständige GitHub-Pages-Adresse als erlaubte Redirect URLs hinzufügen, inklusive Repository-Pfad und abschließendem `/`.
+4. Unter **Authentication → Sign In / Providers** den E-Mail-Anbieter und für Discord den Discord-Anbieter aktivieren. **Allow new users to sign up** muss für die erste Discord-Anmeldung eingeschaltet sein; die lokale Konfiguration erlaubt dies bereits. Das erstellt nur ein Auth-Konto. Teamzugriff wird separat über die Datenbank geprüft. Discord Client ID und Client Secret nach [dieser Anleitung](docs/DISCORD.md) ausschließlich bei Supabase hinterlegen.
+5. Unter **Authentication → URL Configuration** als Site URL zunächst deine Entwicklungsadresse setzen. Die Entwicklungsadresse und später die vollständige Render-Adresse als erlaubte Redirect URLs hinzufügen, jeweils mit abschließendem `/`. Bei GitHub Pages gehört auch der Repository-Pfad dazu.
 6. Für Einladungen und Passwort-E-Mails einen eigenen SMTP-Versand einrichten. Versandlimits und Zustellbarkeit des Anbieters prüfen.
 
 Die Datenbank prüft Teamzugriff und Schreibrechte zusätzlich zu den Auth-Einstellungen. Ein Auth-Konto allein erhält keinerlei Teamdaten. RLS bleibt auf allen Anwendungstabellen eingeschaltet. Siehe [Supabase: Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security).
@@ -100,7 +105,7 @@ npx supabase login
 npx supabase link --project-ref DEINE_PROJEKT_REFERENZ
 ```
 
-3. Im Supabase-Dashboard unter **Edge Functions → Secrets** `SITE_URL` mit der vollständigen späteren Website-Adresse setzen, z. B. `https://DEINNAME.github.io/nexville-team/`. Die Funktion verlangt HTTPS. Die üblichen Supabase-Runtime-Variablen für Projekt-URL, Anon- und Service-Role-Key werden von Supabase bereitgestellt; sie gehören nicht in `.env` des Frontends.
+3. Im Supabase-Dashboard unter **Edge Functions → Secrets** `SITE_URL` mit der vollständigen späteren Website-Adresse setzen, z. B. `https://teamverwaltungnexville.onrender.com/` (die tatsächlich von Render vergebene Adresse verwenden). Die Funktion verlangt HTTPS. Die üblichen Supabase-Runtime-Variablen für Projekt-URL, Anon- und Service-Role-Key werden von Supabase bereitgestellt; sie gehören nicht in `.env` des Frontends.
 4. Funktion bereitstellen:
 
 ```powershell
