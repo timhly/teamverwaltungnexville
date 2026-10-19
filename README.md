@@ -132,7 +132,40 @@ select public.grant_invited_access(
 
 Das ist eine Datenbank-Administratoraktion. Die Funktion prüft, dass Empfänger-ID und E-Mail übereinstimmen und der angegebene Administrator zum Team gehört. Bereits vorhandene Rechte werden nicht überschrieben; Änderungen erfolgen in der Anwendung.
 
-## 4. GitHub und GitHub Pages
+## 4. GitHub und Hosting
+
+### Render (aktuell gewähltes Hosting)
+
+Das Repository ist `https://github.com/timhly/teamverwaltungnexville`. Auf Render **New → Static Site** wählen und dieses Repository verbinden. Es ist kein dauerhaft laufender Web Service erforderlich.
+
+| Feld | Eintrag |
+|---|---|
+| Name | `teamverwaltungnexville` |
+| Branch | `main` |
+| Root Directory | leer lassen |
+| Build Command | `npm ci && npm run build` |
+| Publish Directory | `dist` |
+| Start Command | entfällt bei Static Sites |
+
+Environment Variables:
+
+| Schlüssel | Wert |
+|---|---|
+| `NODE_VERSION` | `24` |
+| `SKIP_INSTALL_DEPS` | `true` |
+| `VITE_BASE_PATH` | `/` |
+| `VITE_SUPABASE_URL` | die eigene Supabase-Projekt-URL |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | der öffentliche Publishable Key oder Legacy-Anon-Key |
+
+Alternativ kann Render die Einstellungen aus `render.yaml` über **New → Blueprint** übernehmen. Projekt-URL und öffentlichen Key dabei selbst eintragen. Ohne Supabase-Verbindung ist nur die Einrichtungsansicht nutzbar. Geheime Service-Role-Keys gehören nicht in das Frontend.
+
+Bei Änderungen an den `VITE_`-Werten neu deployen, damit sie in den Build übernommen werden. Die endgültige Render-Adresse mit abschließendem `/` in Supabase als Site URL und erlaubte Redirect URL sowie beim Einladungsdienst als `SITE_URL` hinterlegen. Das Hash-Routing benötigt keine Rewrite-Regel.
+
+Render kann neue Commits auf `main` automatisch veröffentlichen. Der zusätzliche GitHub-Pages-Workflow ist für dieses Hosting nur noch manuell startbar, damit er nicht bei jedem Render-Update ohne Pages-Konfiguration fehlschlägt.
+
+Grundlage: [Render Static Sites](https://render.com/docs/static-sites), [Render Blueprint-Spezifikation](https://render.com/docs/blueprint-spec).
+
+### GitHub Pages (optionale Alternative)
 
 1. Auf GitHub ein neues Repository anlegen, z. B. `nexville-team`. Für private Repositories kann GitHub Pages einen passenden kostenpflichtigen GitHub-Tarif erfordern.
 2. Den Projektordner mit GitHub Desktop hochladen oder im Terminal ausführen. Falls Git schon initialisiert ist, `git init` auslassen:
@@ -157,7 +190,7 @@ Für eine eigene Domain oder ein Repository `DEINNAME.github.io` muss `VITE_BASE
 
 4. Unter **Settings → Pages → Build and deployment** als Quelle **GitHub Actions** auswählen.
 5. Für freigegebene Änderungen Branchschutz für `main`, Pull-Request-Reviews und erfolgreiche Checks einrichten. Bei Bedarf das Environment `github-pages` mit einem erforderlichen Reviewer schützen.
-6. Unter **Actions** den Pages-Workflow starten oder eine geprüfte Änderung nach `main` pushen. Er führt Datenbank-/Unit-Tests, Browsertests und den Produktionsbuild aus und veröffentlicht nur nach deren Erfolg.
+6. Unter **Actions** den Pages-Workflow manuell starten. Er führt Datenbank-/Unit-Tests, Browsertests und den Produktionsbuild aus und veröffentlicht nur nach deren Erfolg.
 7. Die ausgegebene Pages-URL öffnen. Diese vollständige Adresse zusätzlich in Supabase als Site URL/Redirect URL und als Edge-Function-Secret `SITE_URL` hinterlegen.
 
 Die Anwendung nutzt Hash-Routing, z. B. `/nexville-team/#/mitglieder`. Direkte Links und Neuladen benötigen dadurch keine Server-Rewrite-Regeln auf GitHub Pages. Der Vite-Basispfad gilt auch für das Banner und alle gebauten Assets. Grundlage: [Vite: GitHub Pages](https://vite.dev/guide/static-deploy.html#github-pages), [GitHub Pages Deployment Action](https://github.com/actions/deploy-pages).

@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: teamverwaltungnexville
+    runtime: static
+    repo: https://github.com/timhly/teamverwaltungnexville
+    branch: main
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: SKIP_INSTALL_DEPS
+        value: "true"
+      - key: VITE_BASE_PATH
+        value: /
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_PUBLISHABLE_KEY
+        sync: false
