@@ -1,0 +1,71 @@
+# Abnahmeprotokoll · Nexville Roleplay
+
+Stand: 19.10.2026. Produktive Konten und Dienste wurden noch nicht eingerichtet. Die lokalen Ergebnisse beziehen sich auf den ausgelieferten Code und die PostgreSQL-Testumgebung.
+
+## Lokal überprüft
+
+| Prüfung | Ergebnis |
+|---|---|
+| TypeScript-Prüfung und Vite-Produktionsbuild | Erfolgreich |
+| PostgreSQL-Migrationen ausführen | Erfolgreich mit PGlite/PostgreSQL |
+| Einmaliger Ausgangsbestand, neun Mitglieder, 21 Rollen | Erfolgreich |
+| Acht Hauptränge in der vorgegebenen Reihenfolge | Erfolgreich |
+| Fünf getrennte Zusatzrollen einschließlich Supportleitung und Teamleitung | Erfolgreich |
+| Mehrfachrollen, tatsächliche Zählung und getrennte Referenzzahlen | Erfolgreich |
+| Anonyme und fremde Konten ausschließen | Datenbanktests erfolgreich |
+| Leser darf lesen, aber weder RPC noch Tabellenwrite ausführen | Erfolgreich |
+| Modulrechte für Bearbeiter, kein eigenes Hochstufen | Erfolgreich |
+| Letzten Administrator vor Entfernung/Herabstufung schützen | Erfolgreich |
+| Teamübergreifende Rollenreferenzen ablehnen | Erfolgreich |
+| Rollenzuweisungen und Mitglied atomar speichern/zurückrollen | Erfolgreich |
+| Doppelte Vorgänge mit identischer UUID nur einmal verarbeiten | Erfolgreich |
+| Veraltete Datensatzversion mit Konflikt ablehnen | Erfolgreich |
+| Je Sitzung 13 Themen und eigene Teilnehmerstatuswerte | Erfolgreich |
+| Historische Namen und Rollen bei Umbenennung/Archivierung erhalten | Erfolgreich |
+| Sitzung kopieren, Themen übernehmen, Anwesenheit und Erledigung zurücksetzen | Erfolgreich |
+| Verwarnungsdaten validieren, Ablauf berechnen, Aufhebung historisieren | Erfolgreich |
+| Berliner Tagesgrenzen und Sommer-/Winterzeit | Erfolgreich |
+| Audit unveränderbar für Anwendungskonten, tatsächlicher Akteur | Erfolgreich |
+| Persistenz vor Versand, Bestätigung erst nach Antwort, Outbox-Wiederaufnahme | Erfolgreich |
+| Stopp bei Konflikt, keine unkontrollierte Folgeänderung | Erfolgreich |
+| Neue Mitglieder und Wünsche über die echte React-Oberfläche bearbeiten | Im lokalen Browser geprüft |
+| Bestätigte Änderungen nach Neuladen weiterhin vorhanden | Im lokalen Browser geprüft |
+| Besprechungsthemen, Anwesenheit und Kopien über die Oberfläche | Im lokalen Browser geprüft |
+| Verwarnung und Wunschstatus nach Neuladen erhalten | Im lokalen Browser geprüft |
+| Reader-Oberfläche und manipulierten Write ablehnen | Im lokalen Browser geprüft |
+| Netzwerkabbruch, erhaltene Outbox, erfolgreiche spätere Synchronisierung | Im lokalen Browser geprüft |
+| Desktop, 390-px-Mobilansicht, Navigation, kein globales Überlaufen | Im lokalen Browser geprüft |
+| Light Mode und Dark Mode | Im lokalen Browser geprüft |
+
+Reproduzieren mit `npm test`, `npm run test:e2e` und `npm run build`. Erfolgreich ausgeführt wurden 32 Unit-/Datenbanktests und neun Browsertests, einschließlich sofortigem Neuladen vor Ablauf der Speicherpause und einem konkurrierenden Serverwrite. Der Browserbericht dokumentiert die Szenarien und ihre Screenshots. Diese Tests ersetzen keine Prüfung am echten Supabase-Projekt.
+
+## Noch nicht verifiziert
+
+Diese Schritte benötigen die vom Eigentümer anzulegenden Dienste:
+
+- Tatsächlicher Login und Session-Erneuerung an gehostetem Supabase Auth.
+- E-Mail-Versand, Einladungsannahme und Passwort-Zurücksetzen über den eigenen SMTP-Anbieter.
+- Bereitstellung der Einladungs-Edge-Function einschließlich korrekter `SITE_URL`.
+- Gehostete RLS-/RPC-Endpunkte hinter PostgREST mit echten Benutzer-JWTs. Dieselben SQL-Regeln wurden lokal getestet; die externe Konfiguration wurde noch nicht geprüft.
+- Realtime-Verbindung und Aktualisierung zwischen zwei tatsächlichen Geräten.
+- GitHub-Actions-Ausführung im eigenen Repository und tatsächliche GitHub-Pages-Veröffentlichung.
+- Richtiger Basispfad, Auth-Redirect und Bannerabruf unter der endgültigen Domain.
+- Tatsächlicher PDF-Druckdialog und Ergebnis im Zielbrowser.
+- Lastprüfung mit sehr großen Datenmengen und Langzeitbetrieb.
+
+## Bewusst zurückgestellt
+
+Auf ausdrücklichen Wunsch sind automatische Backups, verschlüsselte externe Kopien, PC-Synchronisierung, Backup-Verwaltung und Testwiederherstellung vorerst nicht eingerichtet. Diese ursprünglichen Kriterien gelten deshalb nicht als bestanden.
+
+## Empfohlener Live-Abnahmedurchlauf
+
+1. Als Administrator anmelden, ein Testmitglied mit Supporter und Unternehmensverwaltung anlegen.
+2. Information bearbeiten, Serverbestätigung abwarten, neu laden und mit einem zweiten Gerät kontrollieren.
+3. Dasselbe Mitglied gleichzeitig auf zwei Geräten bearbeiten und den angezeigten Konflikt prüfen.
+4. Neue Besprechung anlegen, Thema und Anwesenheit ändern, eine zweite Besprechung erstellen und die getrennten Listen kontrollieren.
+5. Verwarnung mit Ablaufdatum anlegen; Aufhebung und Historie kontrollieren.
+6. Wunsch anlegen, Status ändern und im Audit die Vorher-/Nachher-Werte prüfen.
+7. Leser und Bearbeiter einladen; mit deren eigenen Konten die zulässigen und unzulässigen Aktionen prüfen.
+8. Browser kurz offline schalten, bearbeiten, schließen beziehungsweise neu laden, online gehen und den erhaltenen Entwurf synchronisieren.
+9. Sitzung als PDF speichern und CSV-Export in der verwendeten Tabellenkalkulation öffnen.
+10. Nach GitHub-Deployment dieselben grundlegenden Schritte unter der endgültigen URL wiederholen.
