@@ -178,6 +178,38 @@ test("meeting agendas, individual attendance, copies and historical snapshots", 
   );
 });
 
+test("admins can cancel or permanently delete members and meetings", async ({ page }) => {
+  await login(page);
+  await page.goto("/#/besprechungen");
+  await page.getByRole("button", { name: "Besprechung planen", exact: true }).click();
+  await page.getByLabel("Titel", { exact: true }).fill("Endgültig entfernen");
+  await page.getByLabel("Datum & Uhrzeit (Europe/Berlin)", { exact: true }).fill("2026-11-03T20:00");
+  await page.getByRole("button", { name: "Besprechung erstellen", exact: true }).click();
+  await expect(page.locator(".topic-row")).toHaveCount(13);
+  await expect(page.locator(".sync-status button").filter({ hasText: /^Gespeichert$/ })).toBeVisible();
+  page.once("dialog", (dialog) => dialog.dismiss());
+  await page.getByRole("button", { name: "Besprechung endgültig löschen", exact: true }).click();
+  await expect(page.locator(".topic-row")).toHaveCount(13);
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.getByRole("button", { name: "Besprechung endgültig löschen", exact: true }).click();
+  await expect(page.locator(".topic-row")).toHaveCount(0);
+  await expect(page.locator(".sync-status button").filter({ hasText: /^Gespeichert$/ })).toBeVisible();
+  await page.reload();
+  await expect(page.getByText("Endgültig entfernen", { exact: true })).toHaveCount(0);
+  await page.goto("/#/mitglieder");
+  await page.getByRole("button", { name: "Weedy", exact: true }).click();
+  page.once("dialog", (dialog) => dialog.dismiss());
+  await page.getByRole("button", { name: "Mitglied endgültig löschen", exact: true }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.getByRole("button", { name: "Mitglied endgültig löschen", exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.locator(".sync-status button").filter({ hasText: /^Gespeichert$/ })).toBeVisible();
+  await page.reload();
+  await expect(page.locator("h1")).toContainText("Teammitglieder");
+  await expect(page.getByRole("button", { name: "Weedy", exact: true })).toHaveCount(0);
+});
+
 test("warning dates and wish status are saved in the backend", async ({
   page,
 }) => {

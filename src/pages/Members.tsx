@@ -6,6 +6,7 @@ import {
   CalendarDays,
   Plus,
   Search,
+  Trash2,
   Users,
 } from "lucide-react";
 import {
@@ -20,7 +21,7 @@ import {
 } from "../components/ui";
 import { CreateForm, nullable, text } from "../components/forms";
 import { useStore } from "../lib/store";
-import { date, downloadCSV, memberRoles, warningActive } from "../lib/utils";
+import { date, downloadCSV, errorMessage, memberRoles, warningActive } from "../lib/utils";
 import { ActivityList } from "./History";
 import { RolePicker } from "../components/RolePicker";
 
@@ -32,12 +33,17 @@ export default function Members() {
   const [status, setStatus] = useState("current");
   const [sort, setSort] = useState("rank");
   const [page, setPage] = useState(0);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
   const selected = data.team_members.find(
     (m) => m.id === params.get("mitglied"),
   );
   const isNew = params.get("neu") === "1";
   const editable = can("members");
   const close = () => setParams({});
+  useEffect(() => {
+    setDeleteError("");
+  }, [selected?.id]);
   useEffect(() => {
     setPage(0);
   }, [search, role, status, sort]);
@@ -435,25 +441,57 @@ export default function Members() {
                 compact
               />
             </div>
-            {editable && selected.status !== "archived" && (
+            {deleteError && (
+              <div className="notice notice-error" role="alert">
+                {deleteError}
+              </div>
+            )}
+            {(editable || can("admin")) && (
               <div className="form-actions">
-                <Button
-                  variant="danger"
-                  onClick={async () => {
-                    if (
-                      window.confirm(
-                        `${selected.name} archivieren? Besprechungen und Verwarnungen bleiben erhalten.`,
-                      )
-                    ) {
-                      await save("team_members", selected, {
-                        status: "archived",
-                      });
-                      close();
-                    }
-                  }}
-                >
-                  <Archive size={16} /> Mitglied archivieren
-                </Button>
+                {editable && selected.status !== "archived" && (
+                  <Button
+                    variant="secondary"
+                    onClick={async () => {
+                      if (
+                        window.confirm(
+                          `${selected.name} archivieren? Besprechungen und Verwarnungen bleiben erhalten.`,
+                        )
+                      ) {
+                        await save("team_members", selected, {
+                          status: "archived",
+                        });
+                        close();
+                      }
+                    }}
+                  >
+                    <Archive size={16} /> Mitglied archivieren
+                  </Button>
+                )}
+                {can("admin") && (
+                  <Button
+                    variant="danger"
+                    disabled={deleting}
+                    onClick={async () => {
+                      if (
+                        !window.confirm(
+                          `„${selected.name}“ endgültig löschen? Rollenzuweisungen, Verwarnungen und Besprechungsteilnahmen werden ebenfalls gelöscht. Besprechungen, Wünsche und Änderungsprotokolle bleiben erhalten. Dies kann nicht rückgängig gemacht werden.`,
+                        )
+                      ) return;
+                      setDeleting(true);
+                      setDeleteError("");
+                      try {
+                        await save("team_members", selected, {}, true);
+                        close();
+                      } catch (e) {
+                        setDeleteError(errorMessage(e));
+                      } finally {
+                        setDeleting(false);
+                      }
+                    }}
+                  >
+                    <Trash2 size={16} /> Mitglied endgültig löschen
+                  </Button>
+                )}
               </div>
             )}
           </div>

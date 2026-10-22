@@ -8,6 +8,7 @@ import {
   FileDown,
   Plus,
   Search,
+  Trash2,
   Users,
 } from "lucide-react";
 import {
@@ -41,6 +42,7 @@ export default function Meetings() {
   const [error, setError] = useState("");
   const [copying, setCopying] = useState(false);
   const [copyBusy, setCopyBusy] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const meetings = data.meetings
     .filter(
       (m) =>
@@ -190,6 +192,31 @@ export default function Meetings() {
                         onClick={() => setCopying(true)}
                       >
                         <Copy size={16} /> Kopieren
+                      </Button>
+                    )}
+                    {can("admin") && (
+                      <Button
+                        variant="danger"
+                        disabled={deleting}
+                        onClick={async () => {
+                          if (
+                            !window.confirm(
+                              `Besprechung „${selected.title}“ endgültig löschen? Alle Themen, Notizen, Beschlüsse und Teilnahmen dieser Besprechung werden gelöscht. Dies kann nicht rückgängig gemacht werden.`,
+                            )
+                          ) return;
+                          setDeleting(true);
+                          setError("");
+                          try {
+                            await save("meetings", selected, {}, true);
+                            setParams({});
+                          } catch (e) {
+                            setError(errorMessage(e));
+                          } finally {
+                            setDeleting(false);
+                          }
+                        }}
+                      >
+                        <Trash2 size={16} /> Besprechung endgültig löschen
                       </Button>
                     )}
                   </div>

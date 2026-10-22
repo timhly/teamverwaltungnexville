@@ -61,6 +61,7 @@ Bis die nächsten Schritte erledigt sind, siehst du die Einrichtungsansicht. Es 
    8. `supabase/migrations/202610190008_display_names.sql`
    9. `supabase/migrations/202610190009_conflict_http_status.sql`
    10. `supabase/migrations/202610220010_head_analyst_highteam.sql`
+   11. `supabase/migrations/202610220011_permanent_deletion.sql`
 
 4. Unter **Authentication → Sign In / Providers** den Discord-Anbieter aktivieren und den E-Mail-Anbieter deaktivieren. **Allow new users to sign up** muss für die erste Discord-Anmeldung eingeschaltet sein; die lokale Konfiguration erlaubt dies bereits. Das erstellt nur ein Auth-Konto. Teamzugriff wird separat über die Datenbank geprüft. Discord Client ID und Client Secret nach [dieser Anleitung](docs/DISCORD.md) ausschließlich bei Supabase hinterlegen.
 5. Unter **Authentication → URL Configuration** als Site URL zunächst deine Entwicklungsadresse setzen. Die Entwicklungsadresse und später die vollständige Render-Adresse als erlaubte Redirect URLs hinzufügen, jeweils mit abschließendem `/`. Bei GitHub Pages gehört auch der Repository-Pfad dazu.
@@ -68,7 +69,7 @@ Bis die nächsten Schritte erledigt sind, siehst du die Einrichtungsansicht. Es 
 
 Die Datenbank prüft Teamzugriff und Schreibrechte zusätzlich zu den Auth-Einstellungen. Ein Auth-Konto allein erhält keinerlei Teamdaten. RLS bleibt auf allen Anwendungstabellen eingeschaltet. Siehe [Supabase: Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security).
 
-Alle zehn Migrationen anwenden. Migration 009 verwendet für Versionskonflikte `PT409` (HTTP 409), damit PostgREST 14 diese fachlichen Konflikte nicht endlos als `40001` wiederholt. Sie erhält Versionsprüfung, Audit, Berechtigungen und Idempotenz. Siehe [Supabase: Endlosschleifen bei eigenen 40001-Fehlern](https://supabase.com/docs/guides/troubleshooting/high-cpu-and-infinite-transaction-retries-when-using-custom-error-codes-in-rpc-functions-77326b).
+Alle elf Migrationen anwenden. Migration 009 verwendet für Versionskonflikte `PT409` (HTTP 409), damit PostgREST 14 diese fachlichen Konflikte nicht endlos als `40001` wiederholt. Sie erhält Versionsprüfung, Audit, Berechtigungen und Idempotenz. Siehe [Supabase: Endlosschleifen bei eigenen 40001-Fehlern](https://supabase.com/docs/guides/troubleshooting/high-cpu-and-infinite-transaction-retries-when-using-custom-error-codes-in-rpc-functions-77326b).
 
 ### Ersten Administrator anlegen
 
@@ -211,7 +212,7 @@ Die Roleplay-Ränge sind von diesen **Kontorechten** getrennt. Eine Rolle „Pro
 - Alle Fremdschlüssel zu Teamdaten berücksichtigen die Team-ID. Rollen/Teilnehmer können nicht aus einem fremden Team übernommen werden.
 - Der letzte Administrator kann weder entfernt noch herabgestuft werden.
 - Einträge in `audit_logs` können Browserbenutzer weder einfügen, bearbeiten noch löschen.
-- Mitglieder werden archiviert. Historische Sitzungsdaten und Verwarnungen bleiben bestehen.
+- Archivieren bewahrt die Historie. Administratoren können Mitglieder und Besprechungen nach Bestätigung auch endgültig löschen. Bei Mitgliedern werden Rollenzuweisungen, Verwarnungen und Teilnahmen entfernt; Besprechungen und Wünsche bleiben ohne die Mitgliedsverknüpfung erhalten. Bei Besprechungen werden Themen und Teilnahmen entfernt. Audit-Protokolle bleiben erhalten.
 - Die Ablaufprüfung verwendet das gesamte Ablaufdatum in Europe/Berlin. Serverseitig wird der Aktivstatus beim Lesen berechnet; der Originaleintrag wird nicht gelöscht.
 - Ungültige und doppeldeutige lokale Uhrzeiten während der Zeitumstellung werden beim Anlegen von Terminen abgewiesen.
 - CSV-Exporte neutralisieren Tabellenformeln in nutzergesteuerten Werten.

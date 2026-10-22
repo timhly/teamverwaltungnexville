@@ -1,6 +1,8 @@
 # Abnahmeprotokoll · Nexville Roleplay
 
-Stand: 22.10.2026. Im verbundenen Supabase-Projekt wurden alle zehn Migrationen angewendet, der Nexville-Teamraum mit neun Ausgangsmitgliedern angelegt und Administratorrechte sowie Anzeigename „Smok“ für Discord-ID `470653391094415362` per Datenbankabfrage bestätigt. ApX und Soon haben ihre geschützten Ränge und keine unaufgehobenen Verwarnungen. Die vollständige produktive Konfiguration wurde nicht geprüft. Die lokalen Ergebnisse beziehen sich auf den ausgelieferten Code und die PostgreSQL-Testumgebung.
+Stand: 22.10.2026. Im verbundenen Supabase-Projekt wurden alle elf Migrationen angewendet, der Nexville-Teamraum mit neun Ausgangsmitgliedern angelegt und Administratorrechte sowie Anzeigename „Smok“ für Discord-ID `470653391094415362` per Datenbankabfrage bestätigt. ApX und Soon haben ihre geschützten Ränge und keine unaufgehobenen Verwarnungen. Die vollständige produktive Konfiguration wurde nicht geprüft. Die lokalen Ergebnisse beziehen sich auf den ausgelieferten Code und die PostgreSQL-Testumgebung.
+
+Migration 011 ergänzt endgültiges Löschen für Administratoren bei Mitgliedern und Besprechungen. Sie entfernt selbst keine bestehenden Einträge. Abhängigkeiten werden in derselben Transaktion entfernt beziehungsweise gelöst; Audit-Protokolle bleiben erhalten. Lokal bestanden 69 Tests, der Produktionsbuild und ein Browsertest für Bestätigung, Abbrechen und Beständigkeit nach Neuladen. Die Datenbanktests prüfen zusätzlich archivierte Einträge, abhängige Daten, Rechte, Versionskonflikte und wiederholte Operationen.
 
 ## Lokal überprüft
 
