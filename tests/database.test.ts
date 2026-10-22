@@ -27,12 +27,12 @@ describe("PostgreSQL: migrations, permissions and transactional mutations", () =
     );
     return result[0].result;
   };
-  it("seeds nine reference members and twenty-one roles without guessed assignments", async () => {
+  it("seeds nine reference members and twenty-two roles without guessed assignments", async () => {
     expect(
       (await rows("select count(*)::int n from public.team_members"))[0].n,
     ).toBe(9);
     expect((await rows("select count(*)::int n from public.roles"))[0].n).toBe(
-      21,
+      22,
     );
     expect(
       (
@@ -62,6 +62,7 @@ describe("PostgreSQL: migrations, permissions and transactional mutations", () =
     ).toEqual([
       "Projektleitung",
       "Management",
+      "HighTeam",
       "Administration",
       "Senior Moderator",
       "Moderator",
@@ -81,7 +82,22 @@ describe("PostgreSQL: migrations, permissions and transactional mutations", () =
       "Eventverwaltung",
       "Supportleitung",
       "Teamleitung",
+      "Head-Analyst",
     ]);
+    expect(
+      (
+        await rows(
+          "select color,kind,warning_exempt from public.roles where name='HighTeam'",
+        )
+      )[0],
+    ).toMatchObject({ color: "#7dd3fc", kind: "rank", warning_exempt: false });
+    expect(
+      (
+        await rows(
+          "select color,kind from public.roles where name='Head-Analyst'",
+        )
+      )[0],
+    ).toMatchObject({ color: "#a78bfa", kind: "extra" });
     expect(
       (
         await rows(

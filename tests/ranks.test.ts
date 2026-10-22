@@ -6,13 +6,13 @@ import {
   snapshotPosition,
 } from "../src/lib/ranks";
 describe("Nexville rank order", () => {
-  it("sorts the eight ranks in the exact requested order", () => {
+  it("sorts the nine ranks in the exact requested order", () => {
     const shuffled = [...RANK_NAMES]
       .reverse()
       .map((name) => ({ name, kind: "rank" as const, sort_order: 500 }));
     expect(sortRoles(shuffled).map((r) => r.name)).toEqual([...RANK_NAMES]);
   });
-  it("places the five optional extra roles after the ranks", () => {
+  it("places the six optional extra roles after the ranks", () => {
     const items = [...EXTRA_NAMES, ...RANK_NAMES].map((name) => ({
       name,
       kind: EXTRA_NAMES.includes(name as (typeof EXTRA_NAMES)[number])
@@ -27,9 +27,10 @@ describe("Nexville rank order", () => {
   });
   it("understands historical rank names in attendance snapshots", () => {
     expect(snapshotPosition(["Unternehmensverwaltung", "Sr. Moderation"])).toBe(
-      3,
+      4,
     );
-    expect(snapshotPosition(["Fraktionsverwaltung", "Sr. Supporter"])).toBe(5);
+    expect(snapshotPosition(["Fraktionsverwaltung", "Sr. Supporter"])).toBe(6);
+    expect(snapshotPosition(["High Team"])).toBe(2);
     expect(snapshotPosition(["Supportleitung"])).toBe(1000);
   });
 });

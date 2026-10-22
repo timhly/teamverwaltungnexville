@@ -14,8 +14,8 @@ Ansichten aus der lokalen Prüfung: [Desktop](docs/preview/desktop.png), [Smartp
 
 - Dashboard mit tatsächlichen Mitglieder-, Rollen-, Verwarnungs- und Wunschzahlen, nächster Sitzung und gespeicherten Aktivitäten.
 - Mitglieder anlegen, suchen, filtern, sortieren, mit mehreren Rollen versehen, bearbeiten und archivieren. Detailansichten zeigen Verwarnungen, Teilnahmen und letzte Änderungen.
-- Rangfolge: **Projektleitung → Management → Administration → Senior Moderator → Moderator → Senior Supporter → Supporter → Test Supporter**.
-- Getrennte Zusatzrollen: **Fraktionsverwaltung, Unternehmensverwaltung, Eventverwaltung, Supportleitung, Teamleitung**. Die Reihenfolge gilt für Rollenauswahl, Listen, Abzeichen, Mitglieder, Teilnehmerlisten und Exporte. Eine explizit gewählte alphabetische Sortierung bleibt möglich.
+- Rangfolge: **Projektleitung → Management → HighTeam → Administration → Senior Moderator → Moderator → Senior Supporter → Supporter → Test Supporter**.
+- Getrennte Zusatzrollen: **Fraktionsverwaltung, Unternehmensverwaltung, Eventverwaltung, Supportleitung, Teamleitung, Head-Analyst**. Die Reihenfolge gilt für Rollenauswahl, Listen, Abzeichen, Mitglieder, Teilnehmerlisten und Exporte. Eine explizit gewählte alphabetische Sortierung bleibt möglich.
 - Bestehende Sonderrollen aus den Screenshots bleiben erhalten, z. B. Teamverwaltung bei HAZE und Supportverwaltung bei Ivy. Diesen Personen wird kein Hauptrang erfunden. Weitere alte Rollen sind unter „Weitere bestehende Rollen“ sichtbar. Neue Zuweisungen konzentrieren sich auf Ränge und Zusatzrollen.
 - Rollen erstellen, Namen/Farbe/Abkürzung/Beschreibung bearbeiten, aktive Mitglieder zählen, Referenzzahlen getrennt anzeigen. Nicht zugewiesene Rollen dürfen Administratoren entfernen.
 - Besprechungen mit eigenem Archiv, Termin in Europe/Berlin, Leitung, 13 Themenzeilen, zusätzlichen Themen, Erledigungsstatus, Verantwortlichen, Notizen, Ergebnissen und Beschlüssen.
@@ -60,6 +60,7 @@ Bis die nächsten Schritte erledigt sind, siehst du die Einrichtungsansicht. Es 
    7. `supabase/migrations/202610190007_warning_protection.sql`
    8. `supabase/migrations/202610190008_display_names.sql`
    9. `supabase/migrations/202610190009_conflict_http_status.sql`
+   10. `supabase/migrations/202610220010_head_analyst_highteam.sql`
 
 4. Unter **Authentication → Sign In / Providers** den Discord-Anbieter aktivieren und den E-Mail-Anbieter deaktivieren. **Allow new users to sign up** muss für die erste Discord-Anmeldung eingeschaltet sein; die lokale Konfiguration erlaubt dies bereits. Das erstellt nur ein Auth-Konto. Teamzugriff wird separat über die Datenbank geprüft. Discord Client ID und Client Secret nach [dieser Anleitung](docs/DISCORD.md) ausschließlich bei Supabase hinterlegen.
 5. Unter **Authentication → URL Configuration** als Site URL zunächst deine Entwicklungsadresse setzen. Die Entwicklungsadresse und später die vollständige Render-Adresse als erlaubte Redirect URLs hinzufügen, jeweils mit abschließendem `/`. Bei GitHub Pages gehört auch der Repository-Pfad dazu.
@@ -67,7 +68,7 @@ Bis die nächsten Schritte erledigt sind, siehst du die Einrichtungsansicht. Es 
 
 Die Datenbank prüft Teamzugriff und Schreibrechte zusätzlich zu den Auth-Einstellungen. Ein Auth-Konto allein erhält keinerlei Teamdaten. RLS bleibt auf allen Anwendungstabellen eingeschaltet. Siehe [Supabase: Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security).
 
-Alle neun Migrationen anwenden. Migration 009 verwendet für Versionskonflikte `PT409` (HTTP 409), damit PostgREST 14 diese fachlichen Konflikte nicht endlos als `40001` wiederholt. Sie erhält Versionsprüfung, Audit, Berechtigungen und Idempotenz. Siehe [Supabase: Endlosschleifen bei eigenen 40001-Fehlern](https://supabase.com/docs/guides/troubleshooting/high-cpu-and-infinite-transaction-retries-when-using-custom-error-codes-in-rpc-functions-77326b).
+Alle zehn Migrationen anwenden. Migration 009 verwendet für Versionskonflikte `PT409` (HTTP 409), damit PostgREST 14 diese fachlichen Konflikte nicht endlos als `40001` wiederholt. Sie erhält Versionsprüfung, Audit, Berechtigungen und Idempotenz. Siehe [Supabase: Endlosschleifen bei eigenen 40001-Fehlern](https://supabase.com/docs/guides/troubleshooting/high-cpu-and-infinite-transaction-retries-when-using-custom-error-codes-in-rpc-functions-77326b).
 
 ### Ersten Administrator anlegen
 
@@ -82,7 +83,7 @@ where i.provider = 'discord'
   and not exists(select 1 from public.teams);
 ```
 
-Der Befehl gibt eine Team-UUID zurück. Er legt das Team, deinen Administratorzugriff, neun Ausgangsmitglieder und 21 Rollen an: acht Ränge, fünf Zusatzrollen und acht erhaltene Sonderrollen. Die Screenshot-Referenzzahlen bleiben separat; z. B. hat Administration anfangs tatsächlich keine Zuweisung, auch wenn der alte Referenzwert 2 lautet.
+Der Befehl gibt eine Team-UUID zurück. Er legt das Team, deinen Administratorzugriff, neun Ausgangsmitglieder und 22 Rollen an: neun Ränge, sechs Zusatzrollen und sieben erhaltene Sonderrollen. Die Screenshot-Referenzzahlen bleiben separat; z. B. hat Administration anfangs tatsächlich keine Zuweisung, auch wenn der alte Referenzwert 2 lautet.
 
 `provision_team` ist nur über den privilegierten SQL Editor ausführbar. Ein bereits eingerichteter Benutzer wird abgewiesen, damit kein versehentliches zweites Team entsteht. Bei zukünftigen Deployments wird der Ausgangsbestand nicht neu eingespielt.
 

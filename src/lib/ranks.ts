@@ -2,6 +2,7 @@ import type { Member, MemberRole, Role } from "./types";
 export const RANK_NAMES = [
   "Projektleitung",
   "Management",
+  "HighTeam",
   "Administration",
   "Senior Moderator",
   "Moderator",
@@ -15,8 +16,11 @@ export const EXTRA_NAMES = [
   "Eventverwaltung",
   "Supportleitung",
   "Teamleitung",
+  "Head-Analyst",
 ] as const;
 const ALIASES: Record<string, string> = {
+  "High Team": "HighTeam",
+  Highteam: "HighTeam",
   "Sr. Moderation": "Senior Moderator",
   Moderation: "Moderator",
   "Probe Supporter": "Test Supporter",

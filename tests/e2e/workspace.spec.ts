@@ -360,7 +360,7 @@ test("offline outbox survives reload and synchronizes without losing drafts", as
   ).toHaveValue("Entwurf nach Verbindungsabbruch");
 });
 
-test("exact Nexville rank order and all five extras are offered separately", async ({
+test("exact Nexville rank order and all six extras are offered separately", async ({
   page,
 }) => {
   await login(page);
@@ -368,6 +368,7 @@ test("exact Nexville rank order and all five extras are offered separately", asy
   await expect(page.locator("tbody tr td:nth-child(2) strong")).toHaveText([
     "Projektleitung",
     "Management",
+    "HighTeam",
     "Administration",
     "Senior Moderator",
     "Moderator",
@@ -382,6 +383,7 @@ test("exact Nexville rank order and all five extras are offered separately", asy
     "Eventverwaltung",
     "Supportleitung",
     "Teamleitung",
+    "Head-Analyst",
   ]);
   await page.goto("/#/mitglieder");
   await expect(page.locator("tbody tr .member-name strong").first()).toHaveText(
@@ -395,10 +397,50 @@ test("exact Nexville rank order and all five extras are offered separately", asy
     .click();
   await expect(
     page.locator(".role-picker-group").first().getByRole("checkbox"),
-  ).toHaveCount(8);
+  ).toHaveCount(9);
   await expect(
     page.locator(".role-picker-group").nth(1).getByRole("checkbox"),
-  ).toHaveCount(5);
+  ).toHaveCount(6);
+  await page.getByLabel("Benutzername", { exact: true }).fill("HighTeam Test");
+  await page.getByLabel("HighTeam", { exact: true }).check();
+  await page.getByLabel("Head-Analyst", { exact: true }).check();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Mitglied hinzufügen", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "HighTeam Test", exact: true }).first(),
+  ).toBeVisible();
+  await expect(page.locator(".sync-status button")).toHaveText("Gespeichert");
+  await closeDialog(page);
+  await page
+    .getByRole("button", { name: "Mitglied hinzufügen", exact: true })
+    .click();
+  await page
+    .getByLabel("Benutzername", { exact: true })
+    .fill("Administration Test");
+  await page.getByLabel("Administration", { exact: true }).check();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Mitglied hinzufügen", exact: true })
+    .click();
+  await expect(
+    page
+      .getByRole("heading", { name: "Administration Test", exact: true })
+      .first(),
+  ).toBeVisible();
+  await expect(page.locator(".sync-status button")).toHaveText("Gespeichert");
+  await closeDialog(page);
+  await page.reload();
+  await expect(page.locator("tbody tr .member-name strong").nth(2)).toHaveText(
+    "HighTeam Test",
+  );
+  await expect(page.locator("tbody tr .member-name strong").nth(3)).toHaveText(
+    "Administration Test",
+  );
+  await expect(
+    page.locator("tbody tr").filter({ hasText: "HighTeam Test" }),
+  ).toContainText("Head-Analyst");
 });
 
 test("immediate reload before the autosave delay retains the text draft", async ({

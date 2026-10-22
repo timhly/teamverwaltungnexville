@@ -22,6 +22,7 @@ export async function database() {
     "202610190007_warning_protection.sql",
     "202610190008_display_names.sql",
     "202610190009_conflict_http_status.sql",
+    "202610220010_head_analyst_highteam.sql",
   ])
     await db.exec(
       await readFile(

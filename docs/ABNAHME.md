@@ -1,6 +1,6 @@
 # Abnahmeprotokoll · Nexville Roleplay
 
-Stand: 19.10.2026. Im verbundenen Supabase-Projekt wurden alle neun Migrationen angewendet, der Nexville-Teamraum mit neun Ausgangsmitgliedern angelegt und Administratorrechte sowie Anzeigename „Smok“ für Discord-ID `470653391094415362` per Datenbankabfrage bestätigt. ApX und Soon haben ihre geschützten Ränge und keine unaufgehobenen Verwarnungen. Die vollständige produktive Konfiguration wurde nicht geprüft. Die lokalen Ergebnisse beziehen sich auf den ausgelieferten Code und die PostgreSQL-Testumgebung.
+Stand: 22.10.2026. Im verbundenen Supabase-Projekt wurden alle zehn Migrationen angewendet, der Nexville-Teamraum mit neun Ausgangsmitgliedern angelegt und Administratorrechte sowie Anzeigename „Smok“ für Discord-ID `470653391094415362` per Datenbankabfrage bestätigt. ApX und Soon haben ihre geschützten Ränge und keine unaufgehobenen Verwarnungen. Die vollständige produktive Konfiguration wurde nicht geprüft. Die lokalen Ergebnisse beziehen sich auf den ausgelieferten Code und die PostgreSQL-Testumgebung.
 
 ## Lokal überprüft
 
@@ -8,9 +8,9 @@ Stand: 19.10.2026. Im verbundenen Supabase-Projekt wurden alle neun Migrationen 
 |---|---|
 | TypeScript-Prüfung und Vite-Produktionsbuild | Erfolgreich |
 | PostgreSQL-Migrationen ausführen | Erfolgreich mit PGlite/PostgreSQL |
-| Einmaliger Ausgangsbestand, neun Mitglieder, 21 Rollen | Erfolgreich |
-| Acht Hauptränge in der vorgegebenen Reihenfolge | Erfolgreich |
-| Fünf getrennte Zusatzrollen einschließlich Supportleitung und Teamleitung | Erfolgreich |
+| Einmaliger Ausgangsbestand, neun Mitglieder, 22 Rollen | Erfolgreich |
+| Neun Hauptränge in der vorgegebenen Reihenfolge | Erfolgreich |
+| Sechs getrennte Zusatzrollen einschließlich Head-Analyst | Erfolgreich |
 | Mehrfachrollen, tatsächliche Zählung und getrennte Referenzzahlen | Erfolgreich |
 | Anonyme und fremde Konten ausschließen | Datenbanktests erfolgreich |
 | Leser darf lesen, aber weder RPC noch Tabellenwrite ausführen | Erfolgreich |
@@ -87,3 +87,5 @@ Auf ausdrücklichen Wunsch sind automatische Backups, verschlüsselte externe Ko
 9. Sitzung als PDF speichern und CSV-Export in der verwendeten Tabellenkalkulation öffnen.
 10. Nach GitHub-Deployment dieselben grundlegenden Schritte unter der endgültigen URL wiederholen.
 11. Mit einer der fünf freigegebenen Discord-IDs anmelden und direkten Administratorzugriff prüfen. Mit einem anderen Discord-Konto Zugang anfragen, als Leser freigeben und die Rechte prüfen.
+
+Am 22.10.2026 wurden Head-Analyst (lila, #a78bfa) und HighTeam (hellblau, #7dd3fc) ergänzt. Die vorhandene High-Team-Rollen-ID bleibt erhalten. 66 Unit-/Datenbanktests, der Produktionsbuild und der gezielte Browsertest für Rollenauswahl, Speicherung sowie Mitgliedersortierung unter Management und über Administration waren erfolgreich.
